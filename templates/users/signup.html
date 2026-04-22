@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account | Student Productivity Hub{% endblock %}
+
+{% block content %}
+    <h1>Create account</h1>
+    <p>Set up your account to start managing coursework and teaching tasks.</p>
+
+    {% if form.errors %}
+        <div class="errors">Please fix the errors below.</div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create account</button>
+    </form>
+
+    <p class="help-text">
+        Already have an account?
+        <a href="{% url 'login' %}">Log in</a>
+    </p>
+{% endblock %}

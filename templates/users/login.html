@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Student Productivity Hub{% endblock %}
+
+{% block content %}
+    <h1>Log in</h1>
+    <p>Access your student or teacher productivity workspace.</p>
+
+    {% if form.non_field_errors %}
+        <div class="errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Log in</button>
+    </form>
+
+    <p class="help-text">
+        Need an account?
+        <a href="{% url 'signup' %}">Create account</a>
+    </p>
+{% endblock %}
