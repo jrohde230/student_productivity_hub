@@ -37,6 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core',
+    'courses',
+    'assignments',
+    'projects',
+    'resources',
+    'user_calendar',
     'users',
 ]
 
@@ -118,5 +124,5 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'

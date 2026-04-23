@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import login
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView, CreateView
 
@@ -9,7 +10,7 @@ from .forms import EmailAuthenticationForm, SignUpForm
 class EmailLoginView(FormView):
     template_name = "users/login.html"
     form_class = EmailAuthenticationForm
-    success_url = reverse_lazy("login")
+    success_url = reverse_lazy("dashboard")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()

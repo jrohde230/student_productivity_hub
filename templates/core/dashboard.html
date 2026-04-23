@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Student Productivity Hub{% endblock %}
+
+{% block container_class %} wide{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dash-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5eaf0;
+    }
+    .dash-header h1 { margin: 0; font-size: 1.35rem; }
+    .dash-sub { color: #5a6570; margin: 0.35rem 0 0 0; font-size: 0.95rem; }
+    .dash-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .user-label { font-size: 0.9rem; color: #444; }
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+    .card {
+        display: block;
+        padding: 1.1rem;
+        border: 1px solid #dce3eb;
+        border-radius: 8px;
+        background: #fafbfd;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+        border-color: #1f6feb;
+        box-shadow: 0 2px 8px rgba(31, 111, 235, 0.12);
+    }
+    .card h2 {
+        margin: 0 0 0.4rem 0;
+        font-size: 1.05rem;
+    }
+    .card p {
+        margin: 0;
+        font-size: 0.88rem;
+        color: #5a6570;
+        line-height: 1.4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-header">
+    <div>
+        <h1>Welcome{% if user.is_authenticated %}, {{ user.get_username }}{% endif %}</h1>
+        <p class="dash-sub">Jump into courses, assignments, projects, resources, or your calendar.</p>
+    </div>
+    <div class="dash-actions">
+        {% if user.email %}
+            <span class="user-label">{{ user.email }}</span>
+        {% endif %}
+        <a class="btn-link" href="{% url 'logout' %}">Log out</a>
+    </div>
+</div>
+
+<div class="card-grid">
+    <a class="card" href="{% url 'courses:home' %}">
+        <h2>Courses &amp; environments</h2>
+        <p>Link textbooks, LMS links, and class spaces.</p>
+    </a>
+    <a class="card" href="{% url 'assignments:home' %}">
+        <h2>Assignments</h2>
+        <p>Track coursework and deadlines.</p>
+    </a>
+    <a class="card" href="{% url 'projects:home' %}">
+        <h2>Projects</h2>
+        <p>Organize longer-term work and milestones.</p>
+    </a>
+    <a class="card" href="{% url 'resources:home' %}">
+        <h2>Learning resources</h2>
+        <p>Save readings, videos, and reference material.</p>
+    </a>
+    <a class="card" href="{% url 'calendar:home' %}">
+        <h2>Calendar</h2>
+        <p>Add due dates and see what is coming up.</p>
+    </a>
+</div>
+{% endblock %}
