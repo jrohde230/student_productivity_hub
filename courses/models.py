@@ -1,23 +1,38 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 
-class CourseLink(models.Model):
-    TEXTBOOK = "textbook"
-    LEARNING_ENVIRONMENT = "learning_environment"
-    LINK_TYPE_CHOICES = [
-        (TEXTBOOK, "Textbook"),
-        (LEARNING_ENVIRONMENT, "Learning Environment"),
-    ]
-
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="course_links")
-    title = models.CharField(max_length=200)
-    url = models.URLField(max_length=500)
-    link_type = models.CharField(max_length=30, choices=LINK_TYPE_CHOICES)
+class Course(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="courses",
+    )
+    name = models.CharField(max_length=200)
+    course_url = models.URLField(max_length=500, blank=True)
+    instructor_name = models.CharField(max_length=120, blank=True)
+    instructor_email = models.EmailField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["name"]
 
     def __str__(self):
-        return f"{self.title} ({self.get_link_type_display()})"
+        return self.name
+
+
+class Textbook(models.Model):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="textbooks",
+    )
+    title = models.CharField(max_length=200)
+    url = models.URLField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["title"]
+
+    def __str__(self):
+        return self.title

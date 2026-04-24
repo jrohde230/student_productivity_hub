@@ -22,77 +22,96 @@
         width: auto;
         padding: 0.6rem 1rem;
     }
-    .links-list {
+    .course-list {
         list-style: none;
         margin: 0;
         padding: 0;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
-    }
-    .link-item {
-        margin: 0;
-    }
-    .link-card {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        width: 100%;
-        aspect-ratio: 1 / 1;
+        gap: 0.75rem;
+    }
+    .course-card {
         border: 1px solid #dce3eb;
         border-radius: 8px;
-        background: white;
-        padding: 0.75rem;
-        box-sizing: border-box;
-        text-decoration: none;
-        color: inherit;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        background: #fff;
+        padding: 1rem 1rem 0.85rem;
     }
-    .link-card:hover {
-        border-color: #1f6feb;
-        box-shadow: 0 2px 8px rgba(31, 111, 235, 0.12);
-    }
-    .add-tile-btn {
+    .course-card-header {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        aspect-ratio: 1 / 1;
-        border: 1px dashed #8fb8f5;
-        border-radius: 8px;
-        background: #f8fbff;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 0.65rem;
+    }
+    .course-title-block {
+        min-width: 0;
+    }
+    .course-name {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    .course-name-link {
+        color: inherit;
+        text-decoration: none;
+    }
+    .course-name-link:hover {
         color: #1f6feb;
+        text-decoration: underline;
+    }
+    .instructor-line {
+        margin: 0.35rem 0 0;
+        font-size: 0.9rem;
+        color: #5a6570;
+    }
+    .instructor-line a {
+        word-break: break-word;
+    }
+    .course-card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .btn-secondary {
+        width: auto;
+        padding: 0.45rem 0.85rem;
+        background: #fff;
+        color: #1f6feb;
+        border: 1px solid #1f6feb;
+        text-decoration: none;
+        font-size: 0.95rem;
+        border-radius: 6px;
         cursor: pointer;
-        font-weight: 600;
-        gap: 0.25rem;
+        display: inline-block;
+        box-sizing: border-box;
     }
-    .add-tile-btn:hover {
-        border-color: #1f6feb;
-        box-shadow: 0 2px 8px rgba(31, 111, 235, 0.12);
+    .btn-secondary:hover {
+        background: #f0f6ff;
     }
-    .add-tile-plus {
-        font-size: 1.8rem;
-        line-height: 1;
+    .textbook-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.65rem;
     }
-    .link-type {
-        font-size: 0.82rem;
+    .textbook-list li {
+        padding: 0.35rem 0;
+        font-size: 0.95rem;
+    }
+    .textbook-list a {
+        font-weight: 500;
+    }
+    .textbook-empty {
+        margin: 0;
+        padding-top: 0.5rem;
         color: #5a6570;
-        margin-bottom: 0.2rem;
-    }
-    .link-title {
-        font-weight: 600;
-        margin-bottom: 0.35rem;
-        word-break: break-word;
-    }
-    .link-domain {
-        font-size: 0.82rem;
-        color: #5a6570;
-        word-break: break-word;
+        font-size: 0.9rem;
     }
     .empty-note {
         color: #5a6570;
-        margin-top: 1.2rem;
+        margin-top: 1rem;
         padding: 1rem;
         border: 1px dashed #c7d3e0;
         border-radius: 8px;
@@ -139,6 +158,12 @@
     .modal form {
         margin-top: 0.75rem;
     }
+    .field-hint {
+        font-size: 0.85rem;
+        color: #5a6570;
+        margin-top: -0.4rem;
+        margin-bottom: 0.6rem;
+    }
 </style>
 {% endblock %}
 
@@ -146,94 +171,187 @@
     <p><a href="{% url 'dashboard' %}">&larr; Back to dashboard</a></p>
     <div class="page-header">
         <div class="header-text">
-            <h1>Courses &amp; learning environments</h1>
-            <p>Quickly open your linked textbooks and platforms.</p>
+            <h1>Courses</h1>
+            <p>Your courses are listed below. Add textbooks to any course when you have a link or title to track.</p>
         </div>
-        <button type="button" class="action-btn" id="open-link-modal">Add new link</button>
+        <button type="button" class="action-btn" id="open-course-modal">Add course</button>
     </div>
 
-    {% if course_links %}
-        <ul class="links-list">
-            <li class="link-item">
-                <button type="button" class="add-tile-btn" id="open-link-modal-tile">
-                    <span class="add-tile-plus">+</span>
-                    <span>Add link</span>
-                </button>
-            </li>
-            {% for link in course_links %}
-                <li class="link-item">
-                    <a class="link-card" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">
-                        <div>
-                            <div class="link-type">{{ link.get_link_type_display }}</div>
-                            <div class="link-title">{{ link.title }}</div>
+    {% if courses %}
+        <ul class="course-list">
+            {% for course in courses %}
+                <li class="course-card">
+                    <div class="course-card-header">
+                        <div class="course-title-block">
+                            {% if course.course_url %}
+                                <h2 class="course-name"><a class="course-name-link" href="{{ course.course_url }}" target="_blank" rel="noopener noreferrer">{{ course.name }}</a></h2>
+                            {% else %}
+                                <h2 class="course-name">{{ course.name }}</h2>
+                            {% endif %}
+                            {% if course.instructor_name or course.instructor_email %}
+                                <p class="instructor-line">
+                                    {% if course.instructor_name %}Instructor: {{ course.instructor_name }}{% endif %}
+                                    {% if course.instructor_name and course.instructor_email %} · {% endif %}
+                                    {% if course.instructor_email %}<a href="mailto:{{ course.instructor_email }}">{{ course.instructor_email }}</a>{% endif %}
+                                </p>
+                            {% endif %}
                         </div>
-                        <div class="link-domain">{{ link.url }}</div>
-                    </a>
+                        <div class="course-card-actions">
+                            <a class="btn-secondary" href="{% url 'courses:home' %}?edit={{ course.pk }}">Edit course</a>
+                            <button type="button" class="btn-secondary open-textbook-modal" data-course-id="{{ course.pk }}">Add textbook</button>
+                        </div>
+                    </div>
+                    {% with books=course.textbooks.all %}
+                        {% if books %}
+                            <ul class="textbook-list">
+                                {% for book in books %}
+                                    <li>
+                                        {% if book.url %}
+                                            <a href="{{ book.url }}" target="_blank" rel="noopener noreferrer">{{ book.title }}</a>
+                                        {% else %}
+                                            {{ book.title }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="textbook-empty">No textbooks linked yet.</p>
+                        {% endif %}
+                    {% endwith %}
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <ul class="links-list">
-            <li class="link-item">
-                <button type="button" class="add-tile-btn" id="open-link-modal-tile-empty">
-                    <span class="add-tile-plus">+</span>
-                    <span>Add your first link</span>
-                </button>
-            </li>
-        </ul>
-        <p class="empty-note">No links yet. Click the add tile to create your first textbook or learning environment.</p>
+        <p class="empty-note">You have no courses yet. Click &quot;Add course&quot; to create your first one.</p>
     {% endif %}
 
-    <div class="modal-overlay{% if form.errors %} open{% endif %}" id="link-modal-overlay">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-link-title">
+    <div class="modal-overlay{% if course_form_errors %} open{% endif %}" id="course-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-course-title">
             <div class="modal-header">
-                <h2 id="add-link-title">Add a new link</h2>
-                <button type="button" class="close-btn" id="close-link-modal">Close</button>
+                <h2 id="add-course-title">Add course</h2>
+                <button type="button" class="close-btn" id="close-course-modal">Close</button>
             </div>
             <form method="post">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Save link</button>
+                <input type="hidden" name="form_type" value="course">
+                {{ course_form.as_p }}
+                <button type="submit">Save course</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay{% if course_edit_modal_open or course_edit_errors %} open{% endif %}" id="edit-course-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-course-title">
+            <div class="modal-header">
+                <h2 id="edit-course-title">Edit course</h2>
+                <button type="button" class="close-btn" id="close-edit-course-modal">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="edit_course">
+                <input type="hidden" name="course_id" value="{{ edit_course_id }}">
+                {{ course_edit_form.as_p }}
+                <button type="submit">Save changes</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay{% if textbook_form_errors %} open{% endif %}" id="textbook-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-textbook-title">
+            <div class="modal-header">
+                <h2 id="add-textbook-title">Add textbook</h2>
+                <button type="button" class="close-btn" id="close-textbook-modal">Close</button>
+            </div>
+            <form method="post" id="textbook-form">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="textbook">
+                {% for field in textbook_form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+                {% if textbook_form.non_field_errors %}
+                    <div class="errors">{{ textbook_form.non_field_errors }}</div>
+                {% endif %}
+                <p class="field-hint">URL is optional—use it when the textbook has an online link.</p>
+                {% for field in textbook_form.visible_fields %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                <button type="submit">Save textbook</button>
             </form>
         </div>
     </div>
 
     <script>
         (function () {
-            var openBtn = document.getElementById("open-link-modal");
-            var openTileBtn = document.getElementById("open-link-modal-tile");
-            var openTileBtnEmpty = document.getElementById("open-link-modal-tile-empty");
-            var closeBtn = document.getElementById("close-link-modal");
-            var overlay = document.getElementById("link-modal-overlay");
+            var courseOverlay = document.getElementById("course-modal-overlay");
+            var editCourseOverlay = document.getElementById("edit-course-modal-overlay");
+            var textbookOverlay = document.getElementById("textbook-modal-overlay");
+            var openCourseBtn = document.getElementById("open-course-modal");
+            var closeCourseBtn = document.getElementById("close-course-modal");
+            var closeEditCourseBtn = document.getElementById("close-edit-course-modal");
+            var closeTextbookBtn = document.getElementById("close-textbook-modal");
+            var courseField = document.getElementById("id_course");
 
-            function openModal() {
-                overlay.classList.add("open");
+            function openCourseModal() {
+                courseOverlay.classList.add("open");
+            }
+            function closeCourseModal() {
+                courseOverlay.classList.remove("open");
+            }
+            function openTextbookModal(courseId) {
+                if (courseField && courseId) {
+                    courseField.value = courseId;
+                }
+                textbookOverlay.classList.add("open");
+            }
+            function closeTextbookModal() {
+                textbookOverlay.classList.remove("open");
+            }
+            function closeEditCourseModal() {
+                editCourseOverlay.classList.remove("open");
             }
 
-            function closeModal() {
-                overlay.classList.remove("open");
+            openCourseBtn.addEventListener("click", openCourseModal);
+            closeCourseBtn.addEventListener("click", closeCourseModal);
+            if (closeEditCourseBtn) {
+                closeEditCourseBtn.addEventListener("click", closeEditCourseModal);
+            }
+            closeTextbookBtn.addEventListener("click", closeTextbookModal);
+
+            document.querySelectorAll(".open-textbook-modal").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    openTextbookModal(btn.getAttribute("data-course-id"));
+                });
+            });
+
+            courseOverlay.addEventListener("click", function (e) {
+                if (e.target === courseOverlay) closeCourseModal();
+            });
+            textbookOverlay.addEventListener("click", function (e) {
+                if (e.target === textbookOverlay) closeTextbookModal();
+            });
+            if (editCourseOverlay) {
+                editCourseOverlay.addEventListener("click", function (e) {
+                    if (e.target === editCourseOverlay) closeEditCourseModal();
+                });
             }
 
-            openBtn.addEventListener("click", openModal);
-            if (openTileBtn) {
-                openTileBtn.addEventListener("click", openModal);
-            }
-            if (openTileBtnEmpty) {
-                openTileBtnEmpty.addEventListener("click", openModal);
-            }
-            closeBtn.addEventListener("click", closeModal);
-
-            overlay.addEventListener("click", function (event) {
-                if (event.target === overlay) {
-                    closeModal();
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    closeCourseModal();
+                    closeEditCourseModal();
+                    closeTextbookModal();
                 }
             });
 
-            document.addEventListener("keydown", function (event) {
-                if (event.key === "Escape") {
-                    closeModal();
-                }
-            });
+            {% if textbook_form_errors and textbook_course_id %}
+            if (courseField) {
+                courseField.value = "{{ textbook_course_id }}";
+            }
+            {% endif %}
         })();
     </script>
 {% endblock %}
