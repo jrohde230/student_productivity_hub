@@ -4,8 +4,236 @@
 
 {% block container_class %} wide{% endblock %}
 
+{% block extra_head %}
+<style>
+    .page-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .header-text p {
+        margin: 0.35rem 0 0;
+        color: #5a6570;
+    }
+    .action-btn {
+        width: auto;
+        padding: 0.6rem 1rem;
+    }
+    .links-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+    .link-item {
+        margin: 0;
+    }
+    .link-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border: 1px solid #dce3eb;
+        border-radius: 8px;
+        background: white;
+        padding: 0.75rem;
+        box-sizing: border-box;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .link-card:hover {
+        border-color: #1f6feb;
+        box-shadow: 0 2px 8px rgba(31, 111, 235, 0.12);
+    }
+    .add-tile-btn {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border: 1px dashed #8fb8f5;
+        border-radius: 8px;
+        background: #f8fbff;
+        color: #1f6feb;
+        cursor: pointer;
+        font-weight: 600;
+        gap: 0.25rem;
+    }
+    .add-tile-btn:hover {
+        border-color: #1f6feb;
+        box-shadow: 0 2px 8px rgba(31, 111, 235, 0.12);
+    }
+    .add-tile-plus {
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+    .link-type {
+        font-size: 0.82rem;
+        color: #5a6570;
+        margin-bottom: 0.2rem;
+    }
+    .link-title {
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+        word-break: break-word;
+    }
+    .link-domain {
+        font-size: 0.82rem;
+        color: #5a6570;
+        word-break: break-word;
+    }
+    .empty-note {
+        color: #5a6570;
+        margin-top: 1.2rem;
+        padding: 1rem;
+        border: 1px dashed #c7d3e0;
+        border-radius: 8px;
+        background: #fafbfd;
+    }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: 2000;
+    }
+    .modal-overlay.open {
+        display: flex;
+    }
+    .modal {
+        width: 100%;
+        max-width: 480px;
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #dce3eb;
+        padding: 1rem 1rem 0.75rem;
+        box-sizing: border-box;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .modal-header h2 {
+        margin: 0;
+    }
+    .close-btn {
+        border: 1px solid #dce3eb;
+        background: white;
+        color: #344054;
+        width: auto;
+        padding: 0.35rem 0.6rem;
+    }
+    .modal form {
+        margin-top: 0.75rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <p><a href="{% url 'dashboard' %}">&larr; Back to dashboard</a></p>
-    <h1>Courses &amp; learning environments</h1>
-    <p>This section will hold linked textbooks, LMS URLs, and class spaces. Content coming soon.</p>
+    <div class="page-header">
+        <div class="header-text">
+            <h1>Courses &amp; learning environments</h1>
+            <p>Quickly open your linked textbooks and platforms.</p>
+        </div>
+        <button type="button" class="action-btn" id="open-link-modal">Add new link</button>
+    </div>
+
+    {% if course_links %}
+        <ul class="links-list">
+            <li class="link-item">
+                <button type="button" class="add-tile-btn" id="open-link-modal-tile">
+                    <span class="add-tile-plus">+</span>
+                    <span>Add link</span>
+                </button>
+            </li>
+            {% for link in course_links %}
+                <li class="link-item">
+                    <a class="link-card" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">
+                        <div>
+                            <div class="link-type">{{ link.get_link_type_display }}</div>
+                            <div class="link-title">{{ link.title }}</div>
+                        </div>
+                        <div class="link-domain">{{ link.url }}</div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <ul class="links-list">
+            <li class="link-item">
+                <button type="button" class="add-tile-btn" id="open-link-modal-tile-empty">
+                    <span class="add-tile-plus">+</span>
+                    <span>Add your first link</span>
+                </button>
+            </li>
+        </ul>
+        <p class="empty-note">No links yet. Click the add tile to create your first textbook or learning environment.</p>
+    {% endif %}
+
+    <div class="modal-overlay{% if form.errors %} open{% endif %}" id="link-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-link-title">
+            <div class="modal-header">
+                <h2 id="add-link-title">Add a new link</h2>
+                <button type="button" class="close-btn" id="close-link-modal">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Save link</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var openBtn = document.getElementById("open-link-modal");
+            var openTileBtn = document.getElementById("open-link-modal-tile");
+            var openTileBtnEmpty = document.getElementById("open-link-modal-tile-empty");
+            var closeBtn = document.getElementById("close-link-modal");
+            var overlay = document.getElementById("link-modal-overlay");
+
+            function openModal() {
+                overlay.classList.add("open");
+            }
+
+            function closeModal() {
+                overlay.classList.remove("open");
+            }
+
+            openBtn.addEventListener("click", openModal);
+            if (openTileBtn) {
+                openTileBtn.addEventListener("click", openModal);
+            }
+            if (openTileBtnEmpty) {
+                openTileBtnEmpty.addEventListener("click", openModal);
+            }
+            closeBtn.addEventListener("click", closeModal);
+
+            overlay.addEventListener("click", function (event) {
+                if (event.target === overlay) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    closeModal();
+                }
+            });
+        })();
+    </script>
 {% endblock %}

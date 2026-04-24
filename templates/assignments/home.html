@@ -4,8 +4,217 @@
 
 {% block container_class %} wide{% endblock %}
 
+{% block extra_head %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .page-header p {
+        margin: 0.35rem 0 0;
+        color: #5a6570;
+    }
+    .action-btn {
+        width: auto;
+        padding: 0.6rem 1rem;
+    }
+    .panel {
+        border: 1px solid #dce3eb;
+        border-radius: 8px;
+        background: #fafbfd;
+        padding: 1rem;
+    }
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .sort-form {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sort-form select {
+        padding: 0.35rem;
+    }
+    .assignment-list {
+        list-style: none;
+        margin: 1rem 0 0;
+        padding: 0;
+        display: grid;
+        gap: 0.6rem;
+    }
+    .assignment-item {
+        border: 1px solid #dce3eb;
+        border-radius: 8px;
+        background: #fff;
+        padding: 0.75rem;
+    }
+    .assignment-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .assignment-title {
+        font-weight: 600;
+    }
+    .assignment-title-link {
+        color: #1f6feb;
+        text-decoration: none;
+    }
+    .assignment-title-link:hover {
+        text-decoration: underline;
+    }
+    .meta {
+        color: #5a6570;
+        font-size: 0.9rem;
+        margin-top: 0.3rem;
+    }
+    .empty-note {
+        color: #5a6570;
+        margin-top: 1rem;
+    }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: 2000;
+    }
+    .modal-overlay.open {
+        display: flex;
+    }
+    .modal {
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border: 1px solid #dce3eb;
+        border-radius: 10px;
+        padding: 1rem 1rem 0.75rem;
+        box-sizing: border-box;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .modal-header h2 {
+        margin: 0;
+    }
+    .close-btn {
+        width: auto;
+        padding: 0.35rem 0.6rem;
+        background: white;
+        color: #344054;
+        border: 1px solid #dce3eb;
+    }
+    .modal form {
+        margin-top: 0.75rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <p><a href="{% url 'dashboard' %}">&larr; Back to dashboard</a></p>
-    <h1>Assignments</h1>
-    <p>Assignment tracking will appear here. Content coming soon.</p>
+    <div class="page-header">
+        <div>
+            <h1>Assignments</h1>
+            <p>Add assignments and keep them sorted so deadlines are easy to track.</p>
+        </div>
+        <button type="button" id="open-assignment-modal" class="action-btn">Add assignment</button>
+    </div>
+
+    <section class="panel">
+        <div class="list-header">
+            <h2>Assignment list</h2>
+            <form method="get" class="sort-form">
+                <label for="sort">Sort by</label>
+                <select id="sort" name="sort" onchange="this.form.submit()">
+                    <option value="due_asc" {% if selected_sort == "due_asc" %}selected{% endif %}>Due date (soonest first)</option>
+                    <option value="due_desc" {% if selected_sort == "due_desc" %}selected{% endif %}>Due date (latest first)</option>
+                    <option value="class_asc" {% if selected_sort == "class_asc" %}selected{% endif %}>Class name (A-Z)</option>
+                    <option value="subject_asc" {% if selected_sort == "subject_asc" %}selected{% endif %}>Subject (A-Z)</option>
+                    <option value="name_asc" {% if selected_sort == "name_asc" %}selected{% endif %}>Assignment name (A-Z)</option>
+                </select>
+            </form>
+        </div>
+
+        {% if assignments %}
+            <ul class="assignment-list">
+                {% for assignment in assignments %}
+                    <li class="assignment-item">
+                        <div class="assignment-top">
+                            {% if assignment.assignment_url %}
+                                <a class="assignment-title assignment-title-link" href="{{ assignment.assignment_url }}" target="_blank" rel="noopener noreferrer">{{ assignment.assignment_name }}</a>
+                            {% else %}
+                                <span class="assignment-title">{{ assignment.assignment_name }}</span>
+                            {% endif %}
+                            <span>{{ assignment.due_date }}</span>
+                        </div>
+                        <div class="meta">
+                            Class: {{ assignment.class_name }} | Subject: {{ assignment.subject }}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-note">No assignments yet. Click "Add assignment" to create your first one.</p>
+        {% endif %}
+    </section>
+
+    <div class="modal-overlay{% if form.errors %} open{% endif %}" id="assignment-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-assignment-title">
+            <div class="modal-header">
+                <h2 id="add-assignment-title">Add assignment</h2>
+                <button type="button" id="close-assignment-modal" class="close-btn">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Save assignment</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var openBtn = document.getElementById("open-assignment-modal");
+            var closeBtn = document.getElementById("close-assignment-modal");
+            var overlay = document.getElementById("assignment-modal-overlay");
+
+            function openModal() {
+                overlay.classList.add("open");
+            }
+
+            function closeModal() {
+                overlay.classList.remove("open");
+            }
+
+            openBtn.addEventListener("click", openModal);
+            closeBtn.addEventListener("click", closeModal);
+
+            overlay.addEventListener("click", function (event) {
+                if (event.target === overlay) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    closeModal();
+                }
+            });
+        })();
+    </script>
 {% endblock %}

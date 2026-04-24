@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'projects',
     'resources',
     'user_calendar',
+    'notes',
+    'tags',
     'users',
 ]
 
