@@ -4,8 +4,281 @@
 
 {% block container_class %} wide{% endblock %}
 
+{% block extra_head %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    .page-header p {
+        margin: 0.35rem 0 0;
+        color: #5a6570;
+    }
+    .action-btn {
+        width: auto;
+        padding: 0.6rem 1rem;
+    }
+    .projects-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    @media (max-width: 920px) {
+        .projects-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    .panel {
+        border: 1px solid #dce3eb;
+        border-radius: 8px;
+        background: #fafbfd;
+        padding: 1rem;
+    }
+    .project-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .project-list a {
+        display: block;
+        text-decoration: none;
+        color: #1f2937;
+        padding: 0.6rem 0.7rem;
+        border: 1px solid #dce3eb;
+        border-radius: 6px;
+        background: #fff;
+    }
+    .project-list a:hover {
+        border-color: #1f6feb;
+        background: #f0f6ff;
+    }
+    .project-list a.active {
+        border-color: #1f6feb;
+        background: #e8f1ff;
+        font-weight: 600;
+    }
+    .project-details h2 {
+        margin-top: 0;
+        margin-bottom: 0.35rem;
+    }
+    .project-description {
+        color: #4b5563;
+        white-space: pre-wrap;
+        margin-bottom: 1rem;
+    }
+    .link-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .link-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .link-list li {
+        background: #fff;
+        border: 1px solid #dce3eb;
+        border-radius: 6px;
+        padding: 0.55rem 0.65rem;
+    }
+    .link-name {
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    .empty-note {
+        color: #5a6570;
+        margin-top: 0.5rem;
+    }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: 2000;
+    }
+    .modal-overlay.open {
+        display: flex;
+    }
+    .modal {
+        width: 100%;
+        max-width: 480px;
+        background: #fff;
+        border: 1px solid #dce3eb;
+        border-radius: 10px;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    .close-btn {
+        width: auto;
+        padding: 0.35rem 0.6rem;
+        background: #fff;
+        color: #344054;
+        border: 1px solid #dce3eb;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <p><a href="{% url 'dashboard' %}">&larr; Back to dashboard</a></p>
-    <h1>Projects</h1>
-    <p>Project planning will appear here. Content coming soon.</p>
+
+    <div class="page-header">
+        <div>
+            <h1>Projects</h1>
+            <p>Select a project on the left to view details and links on the right.</p>
+        </div>
+        <button type="button" class="action-btn" id="open-project-modal">Add project</button>
+    </div>
+
+    <div class="projects-layout">
+        <section class="panel">
+            <h2>Project list</h2>
+            {% if projects %}
+                <ul class="project-list">
+                    {% for project in projects %}
+                        <li>
+                            <a href="{% url 'projects:home' %}?project={{ project.pk }}"{% if selected_project and selected_project.pk == project.pk %} class="active"{% endif %}>{{ project.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-note">No projects yet. Add your first project.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel project-details">
+            {% if selected_project %}
+                <h2>{{ selected_project.name }}</h2>
+                {% if selected_project.description %}
+                    <p class="project-description">{{ selected_project.description }}</p>
+                {% else %}
+                    <p class="project-description">No project description yet.</p>
+                {% endif %}
+
+                <div class="link-header">
+                    <h3>Project links</h3>
+                    <button type="button" class="action-btn" id="open-link-modal">Add link</button>
+                </div>
+
+                {% if selected_project.links.all %}
+                    <ul class="link-list">
+                        {% for link in selected_project.links.all %}
+                            <li>
+                                <div class="link-name">{{ link.name }}</div>
+                                <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.url }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-note">No links added for this project yet.</p>
+                {% endif %}
+            {% else %}
+                <h2>No project selected</h2>
+                <p class="empty-note">Create a project to see details and related links here.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <div class="modal-overlay{% if open_project_modal %} open{% endif %}" id="project-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+            <div class="modal-header">
+                <h2 id="project-modal-title">Add project</h2>
+                <button type="button" class="close-btn" id="close-project-modal">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="project">
+                {{ project_form.as_p }}
+                <button type="submit">Save project</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay{% if open_link_modal %} open{% endif %}" id="link-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="link-modal-title">
+            <div class="modal-header">
+                <h2 id="link-modal-title">Add project link</h2>
+                <button type="button" class="close-btn" id="close-link-modal">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="link">
+                {% for field in project_link_form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+                {% for field in project_link_form.visible_fields %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                {% if project_link_form.non_field_errors %}
+                    <div class="errors">{{ project_link_form.non_field_errors }}</div>
+                {% endif %}
+                <button type="submit">Save link</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var projectOverlay = document.getElementById("project-modal-overlay");
+            var linkOverlay = document.getElementById("link-modal-overlay");
+            var openProjectBtn = document.getElementById("open-project-modal");
+            var openLinkBtn = document.getElementById("open-link-modal");
+            var closeProjectBtn = document.getElementById("close-project-modal");
+            var closeLinkBtn = document.getElementById("close-link-modal");
+
+            function openProjectModal() { projectOverlay.classList.add("open"); }
+            function closeProjectModal() { projectOverlay.classList.remove("open"); }
+            function openLinkModal() { linkOverlay.classList.add("open"); }
+            function closeLinkModal() { linkOverlay.classList.remove("open"); }
+
+            openProjectBtn.addEventListener("click", openProjectModal);
+            if (openLinkBtn) {
+                openLinkBtn.addEventListener("click", openLinkModal);
+            }
+            closeProjectBtn.addEventListener("click", closeProjectModal);
+            closeLinkBtn.addEventListener("click", closeLinkModal);
+
+            projectOverlay.addEventListener("click", function (e) {
+                if (e.target === projectOverlay) closeProjectModal();
+            });
+            linkOverlay.addEventListener("click", function (e) {
+                if (e.target === linkOverlay) closeLinkModal();
+            });
+
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    closeProjectModal();
+                    closeLinkModal();
+                }
+            });
+        })();
+    </script>
 {% endblock %}
