@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Tag Search | Student Productivity Hub{% endblock %}
+
+{% block container_class %} wide{% endblock %}
+
+{% block content %}
+    <h1>Tag Search</h1>
+    {% if query %}
+        <p>Showing results for <strong>{{ query }}</strong>.</p>
+    {% else %}
+        <p>Enter a tag in the top search bar to find related items.</p>
+    {% endif %}
+
+    {% if query %}
+        <h2>Courses</h2>
+        {% if course_results %}
+            <ul>
+                {% for row in course_results %}
+                    <li><a href="{% url 'courses:home' %}">{{ row.obj.name }}</a> ({{ row.labels|join:", " }})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No matching courses.</p>
+        {% endif %}
+
+        <h2>Textbooks</h2>
+        {% if textbook_results %}
+            <ul>
+                {% for row in textbook_results %}
+                    <li><a href="{% url 'courses:home' %}">{{ row.obj.title }}</a> ({{ row.labels|join:", " }})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No matching textbooks.</p>
+        {% endif %}
+
+        <h2>Assignments</h2>
+        {% if assignment_results %}
+            <ul>
+                {% for row in assignment_results %}
+                    <li><a href="{% url 'assignments:home' %}">{{ row.obj.assignment_name }}</a> ({{ row.labels|join:", " }})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No matching assignments.</p>
+        {% endif %}
+
+        <h2>Projects</h2>
+        {% if project_results %}
+            <ul>
+                {% for row in project_results %}
+                    <li><a href="{% url 'projects:home' %}?project={{ row.obj.pk }}">{{ row.obj.name }}</a> ({{ row.labels|join:", " }})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No matching projects.</p>
+        {% endif %}
+
+        <h2>Resources</h2>
+        {% if resource_results %}
+            <ul>
+                {% for row in resource_results %}
+                    <li><a href="{% url 'resources:home' %}">{{ row.obj.name }}</a> ({{ row.labels|join:", " }})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No matching resources.</p>
+        {% endif %}
+    {% endif %}
+{% endblock %}

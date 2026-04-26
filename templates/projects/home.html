@@ -57,12 +57,12 @@
         background: #fff;
     }
     .project-list a:hover {
-        border-color: #1f6feb;
-        background: #f0f6ff;
+        border-color: #7c3aed;
+        background: #f3e8ff;
     }
     .project-list a.active {
-        border-color: #1f6feb;
-        background: #e8f1ff;
+        border-color: #7c3aed;
+        background: #ede9fe;
         font-weight: 600;
     }
     .project-details h2 {
@@ -135,7 +135,11 @@
         cursor: pointer;
     }
     .btn-inline:hover {
-        background: #f5f7fa;
+        background: #f3e8ff;
+        border-color: #7c3aed;
+        color: #4c1d95;
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.22);
+        filter: brightness(1.02);
     }
     .btn-inline-danger {
         width: auto;
@@ -148,7 +152,11 @@
         cursor: pointer;
     }
     .btn-inline-danger:hover {
-        background: #ffe8e8;
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+        filter: brightness(1.02);
     }
     .inline-form {
         display: inline;
@@ -192,6 +200,18 @@
         font-size: 0.8rem;
         line-height: 1.2;
     }
+    .note-edit-toggle:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
+    .note-actions button:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
+    .note-form button:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
     .note-form textarea {
         width: 100%;
         box-sizing: border-box;
@@ -205,6 +225,54 @@
     }
     .note-add-form { display: none; margin-top: 0.35rem; }
     .note-add-form.open { display: block; }
+    .tags-block {
+        margin-top: 0.7rem;
+        border-top: 1px solid #e5eaf0;
+        padding-top: 0.5rem;
+    }
+    .tag-list {
+        list-style: none;
+        margin: 0 0 0.3rem;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+    }
+    .tag-list li {
+        background: #f3e8ff;
+        border: 1px solid #c4b5fd;
+        border-radius: 999px;
+        padding: 0.08rem 0.2rem 0.08rem 0.45rem;
+        font-size: 0.78rem;
+        color: #4c1d95;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    .tag-delete-form { display: inline; margin: 0; }
+    .tag-delete-btn {
+        width: auto;
+        border: 0;
+        background: transparent;
+        color: #4c1d95;
+        padding: 0;
+        line-height: 1;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    .tag-delete-btn:hover {
+        background: rgba(124, 58, 237, 0.12);
+        border-radius: 4px;
+        color: #5b21b6;
+    }
+    .tag-add-form { display: none; margin-top: 0.3rem; }
+    .tag-add-form.open { display: block; }
+    .tag-add-form input { padding: 0.35rem 0.45rem; font-size: 0.82rem; }
+    .tag-add-form button { width: auto; margin-top: 0.3rem; padding: 0.28rem 0.6rem; font-size: 0.78rem; }
+    .tag-add-form button:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -240,6 +308,13 @@
         background: #fff;
         color: #344054;
         border: 1px solid #dce3eb;
+    }
+    .close-btn:hover {
+        filter: none;
+        background: #f3e8ff;
+        border-color: #7c3aed;
+        color: #4c1d95;
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
     }
 </style>
 {% endblock %}
@@ -328,6 +403,25 @@
                         <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
                         <textarea name="body" placeholder="Add a note for this project"></textarea>
                         <button type="submit">Save note</button>
+                    </form>
+                </div>
+                <div class="tags-block">
+                    {% if selected_project.tags_list %}
+                        <ul class="tag-list">
+                            {% for tag in selected_project.tags_list %}
+                                <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><input type="hidden" name="project_context" value="{{ selected_project.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-project-{{ selected_project.pk }}">Add tag</button>
+                    <form method="post" class="tag-add-form" id="tag-add-project-{{ selected_project.pk }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_tag">
+                        <input type="hidden" name="content_type_id" value="{{ ct_project_id }}">
+                        <input type="hidden" name="object_id" value="{{ selected_project.pk }}">
+                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                        <input type="text" name="label" placeholder="#math">
+                        <button type="submit">Save tag</button>
                     </form>
                 </div>
 

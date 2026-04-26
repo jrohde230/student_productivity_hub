@@ -61,3 +61,23 @@ class SignUpForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class UsernameChangeForm(forms.ModelForm):
+    """Allow the signed-in user to change their username (must stay unique)."""
+
+    class Meta:
+        model = User
+        fields = ("username",)
+        labels = {"username": "New username"}
+
+    def clean_username(self):
+        username = self.cleaned_data["username"].strip()
+        if not username:
+            raise ValidationError("Username cannot be empty.")
+        qs = User.objects.filter(username__iexact=username)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("That username is already taken.")
+        return username

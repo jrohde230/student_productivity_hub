@@ -13,6 +13,13 @@ from notes.services import (
     notes_for_target,
     update_note_for_user,
 )
+from tags.forms import TagCreateForm
+from tags.services import (
+    create_tag_for_target,
+    delete_tag_for_user,
+    tags_by_target,
+    tags_for_target,
+)
 from .forms import EditProjectForm, EditProjectLinkForm, ProjectForm, ProjectLinkForm
 from .models import Project, ProjectLink
 
@@ -43,6 +50,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
         context['project_form'] = kwargs.get('project_form', ProjectForm(prefix='project'))
         context['note_form'] = NoteCreateForm()
         context['note_edit_form'] = NoteEditForm()
+        context["tag_form"] = TagCreateForm()
 
         if selected_project:
             context['project_link_form'] = kwargs.get(
@@ -71,7 +79,9 @@ class HomeView(LoginRequiredMixin, TemplateView):
         context["ct_project_id"] = ct_map[Project].id
         if selected_project:
             grouped_notes = notes_by_target(self.request.user, [selected_project])
+            grouped_tags = tags_by_target(self.request.user, [selected_project])
             selected_project.notes_list = notes_for_target(grouped_notes, selected_project)
+            selected_project.tags_list = tags_for_target(grouped_tags, selected_project)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -184,6 +194,39 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     messages.error(request, "Unable to attach note to that item.")
             else:
                 messages.error(request, "Note cannot be empty.")
+            return redirect(redirect_url)
+
+        if form_type == "add_tag":
+            selected_project_id = request.POST.get("project_context")
+            redirect_url = self.success_url
+            if selected_project_id:
+                redirect_url = f"{self.success_url}?project={selected_project_id}"
+            form = TagCreateForm(request.POST)
+            if form.is_valid():
+                tag = create_tag_for_target(
+                    user=request.user,
+                    content_type_id=request.POST.get("content_type_id"),
+                    object_id=request.POST.get("object_id"),
+                    label=form.cleaned_data["label"],
+                )
+                if tag:
+                    messages.success(request, "Tag added.")
+                else:
+                    messages.error(request, "Unable to attach tag to that item.")
+            else:
+                messages.error(request, "Tag cannot be empty.")
+            return redirect(redirect_url)
+
+        if form_type == "delete_tag":
+            selected_project_id = request.POST.get("project_context")
+            redirect_url = self.success_url
+            if selected_project_id:
+                redirect_url = f"{self.success_url}?project={selected_project_id}"
+            deleted = delete_tag_for_user(user=request.user, tag_id=request.POST.get("tag_id"))
+            if deleted:
+                messages.success(request, "Tag removed.")
+            else:
+                messages.error(request, "Unable to remove that tag.")
             return redirect(redirect_url)
 
         if form_type == "edit_note":

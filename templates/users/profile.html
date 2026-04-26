@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | Student Productivity Hub{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-meta {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border: 1px solid #dce3eb;
+        border-radius: 8px;
+        background: #fafbfd;
+    }
+    .profile-meta li {
+        padding: 0.65rem 0.85rem;
+        border-bottom: 1px solid #eef2f6;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.75rem;
+        align-items: baseline;
+    }
+    .profile-meta li:last-child {
+        border-bottom: 0;
+    }
+    .profile-meta .label {
+        font-weight: 600;
+        color: #445;
+        min-width: 7rem;
+    }
+    .profile-meta .value {
+        color: #1f2937;
+        word-break: break-word;
+    }
+    .profile-section {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid #eef2f6;
+    }
+    .profile-section p {
+        margin: 0 0 0.75rem;
+        color: #5a6570;
+        font-size: 0.92rem;
+    }
+    .username-change-form .errors,
+    .username-change-form ul.errorlist {
+        color: #a30000;
+        margin: 0 0 0.75rem;
+        padding-left: 1.1rem;
+    }
+    .username-change-form p {
+        margin-bottom: 0.65rem;
+    }
+    .username-change-form button[type="submit"] {
+        width: auto;
+        margin-top: 0.25rem;
+        padding: 0.45rem 0.9rem;
+    }
+    .username-change-toggle {
+        width: auto;
+        padding: 0.4rem 0.85rem;
+        font-size: 0.9rem;
+        background: #7c3aed;
+        color: #fff;
+        border: 1px solid #6d28d9;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+    }
+    .username-change-toggle:hover {
+        background: #6d28d9;
+        color: #fff;
+        border-color: #5b21b6;
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35);
+    }
+    .username-change-panel {
+        display: none;
+    }
+    .username-change-panel.open {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <p><a href="{% url 'dashboard' %}">&larr; Back to dashboard</a></p>
+    <h1>Your profile</h1>
+    <p>Account details for your productivity hub.</p>
+
+    <ul class="profile-meta">
+        <li>
+            <span class="label">Username</span>
+            <span class="value">{{ user.get_username }}</span>
+        </li>
+        <li>
+            <span class="label">Email</span>
+            <span class="value">{% if user.email %}{{ user.email }}{% else %}Not set{% endif %}</span>
+        </li>
+        <li>
+            <span class="label">Member since</span>
+            <span class="value">{{ user.date_joined|date:"F j, Y" }}</span>
+        </li>
+    </ul>
+
+    <section class="profile-section">
+        <button type="button" class="username-change-toggle" data-target="username-change-panel" id="username-change-toggle">Change username</button>
+        <div id="username-change-panel" class="username-change-panel{% if username_form.errors %} open{% endif %}">
+            <p>Pick a new username. It must be unique and is used when you sign in with your email and password.</p>
+            <form method="post" class="username-change-form">
+                {% csrf_token %}
+                {% if username_form.non_field_errors %}
+                    <div class="errors">{{ username_form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in username_form %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                <button type="submit">Save username</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        (function () {
+            var toggle = document.getElementById("username-change-toggle");
+            var panel = document.getElementById("username-change-panel");
+            if (!toggle || !panel) return;
+            toggle.addEventListener("click", function () {
+                panel.classList.toggle("open");
+                if (panel.classList.contains("open")) {
+                    var input = panel.querySelector("input[name='username']");
+                    if (input) input.focus();
+                }
+            });
+        })();
+    </script>
+{% endblock %}

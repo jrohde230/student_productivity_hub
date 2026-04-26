@@ -20,6 +20,13 @@ from notes.services import (
     notes_for_target,
     update_note_for_user,
 )
+from tags.forms import TagCreateForm
+from tags.services import (
+    create_tag_for_target,
+    delete_tag_for_user,
+    tags_by_target,
+    tags_for_target,
+)
 from .forms import AddResourceForm, EditResourceForm, RenameColumnForm
 from .models import ResourceColumn, ResourceItem
 
@@ -54,8 +61,11 @@ class HomeView(LoginRequiredMixin, TemplateView):
         for column in context["columns"]:
             resource_items.extend(list(column.items.all()))
         grouped_notes = notes_by_target(self.request.user, resource_items)
+        grouped_tags = tags_by_target(self.request.user, resource_items)
         for item in resource_items:
             item.notes_list = notes_for_target(grouped_notes, item)
+            item.tags_list = tags_for_target(grouped_tags, item)
+        context["tag_form"] = TagCreateForm()
 
         if "rename_form" in kwargs:
             context["rename_form"] = kwargs["rename_form"]
@@ -159,6 +169,31 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     messages.error(request, "Unable to attach note to that item.")
             else:
                 messages.error(request, "Note cannot be empty.")
+            return redirect(self.success_url)
+
+        if form_type == "add_tag":
+            form = TagCreateForm(request.POST)
+            if form.is_valid():
+                tag = create_tag_for_target(
+                    user=request.user,
+                    content_type_id=request.POST.get("content_type_id"),
+                    object_id=request.POST.get("object_id"),
+                    label=form.cleaned_data["label"],
+                )
+                if tag:
+                    messages.success(request, "Tag added.")
+                else:
+                    messages.error(request, "Unable to attach tag to that item.")
+            else:
+                messages.error(request, "Tag cannot be empty.")
+            return redirect(self.success_url)
+
+        if form_type == "delete_tag":
+            deleted = delete_tag_for_user(user=request.user, tag_id=request.POST.get("tag_id"))
+            if deleted:
+                messages.success(request, "Tag removed.")
+            else:
+                messages.error(request, "Unable to remove that tag.")
             return redirect(self.success_url)
 
         if form_type == "edit_note":

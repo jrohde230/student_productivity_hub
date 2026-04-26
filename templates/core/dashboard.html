@@ -69,12 +69,16 @@
         color: #344054;
     }
     .btn-nav:hover {
-        background: #f0f6ff;
-        border-color: #1f6feb;
+        background: #f3e8ff;
+        border-color: #7c3aed;
     }
     .btn-small {
         width: auto;
         padding: 0.45rem 0.85rem;
+    }
+    .btn-small:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
     }
 
     .calendar-grid {
@@ -124,7 +128,7 @@
         word-break: break-word;
     }
     .day-item.assignment {
-        background: #e8f1ff;
+        background: #ede9fe;
         border: 1px solid #b9d3ff;
     }
     .day-item.event {
@@ -152,8 +156,8 @@
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .card:hover {
-        border-color: #1f6feb;
-        box-shadow: 0 2px 8px rgba(31, 111, 235, 0.12);
+        border-color: #7c3aed;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.18);
     }
     .card h2 {
         margin: 0 0 0.4rem 0;
@@ -201,6 +205,13 @@
         background: #fff;
         color: #344054;
         border: 1px solid #dce3eb;
+    }
+    .close-btn:hover {
+        filter: none;
+        background: #f3e8ff;
+        border-color: #7c3aed;
+        color: #4c1d95;
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
     }
 </style>
 {% endblock %}

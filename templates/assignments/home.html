@@ -66,7 +66,7 @@
         font-weight: 600;
     }
     .assignment-title-link {
-        color: #1f6feb;
+        color: #7c3aed;
         text-decoration: none;
     }
     .assignment-title-link:hover {
@@ -116,6 +116,18 @@
         font-size: 0.8rem;
         line-height: 1.2;
     }
+    .note-edit-toggle:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
+    .note-actions button:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
+    .note-form button:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
     .note-form textarea {
         width: 100%;
         box-sizing: border-box;
@@ -129,6 +141,54 @@
     }
     .note-add-form { display: none; margin-top: 0.3rem; }
     .note-add-form.open { display: block; }
+    .tags-block {
+        margin-top: 0.5rem;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.45rem;
+    }
+    .tag-list {
+        list-style: none;
+        margin: 0 0 0.3rem;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+    }
+    .tag-list li {
+        background: #f3e8ff;
+        border: 1px solid #c4b5fd;
+        border-radius: 999px;
+        padding: 0.08rem 0.2rem 0.08rem 0.45rem;
+        font-size: 0.78rem;
+        color: #4c1d95;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    .tag-delete-form { display: inline; margin: 0; }
+    .tag-delete-btn {
+        width: auto;
+        border: 0;
+        background: transparent;
+        color: #4c1d95;
+        padding: 0;
+        line-height: 1;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    .tag-delete-btn:hover {
+        background: rgba(124, 58, 237, 0.12);
+        border-radius: 4px;
+        color: #5b21b6;
+    }
+    .tag-add-form { display: none; margin-top: 0.25rem; }
+    .tag-add-form.open { display: block; }
+    .tag-add-form input { padding: 0.35rem 0.45rem; font-size: 0.82rem; }
+    .tag-add-form button { width: auto; margin-top: 0.3rem; padding: 0.28rem 0.6rem; font-size: 0.78rem; }
+    .tag-add-form button:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -166,6 +226,13 @@
         background: white;
         color: #344054;
         border: 1px solid #dce3eb;
+    }
+    .close-btn:hover {
+        filter: none;
+        background: #f3e8ff;
+        border-color: #7c3aed;
+        color: #4c1d95;
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
     }
     .modal form {
         margin-top: 0.75rem;
@@ -248,6 +315,24 @@
                                 <input type="hidden" name="object_id" value="{{ assignment.pk }}">
                                 <textarea name="body" placeholder="Add a note for this assignment"></textarea>
                                 <button type="submit">Save note</button>
+                            </form>
+                        </div>
+                        <div class="tags-block">
+                            {% if assignment.tags_list %}
+                                <ul class="tag-list">
+                                    {% for tag in assignment.tags_list %}
+                                        <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-assignment-{{ assignment.pk }}">Add tag</button>
+                            <form method="post" class="tag-add-form" id="tag-add-assignment-{{ assignment.pk }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_tag">
+                                <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
+                                <input type="hidden" name="object_id" value="{{ assignment.pk }}">
+                                <input type="text" name="label" placeholder="#math">
+                                <button type="submit">Save tag</button>
                             </form>
                         </div>
                     </li>
