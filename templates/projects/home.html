@@ -69,6 +69,18 @@
         margin-top: 0;
         margin-bottom: 0.35rem;
     }
+    .details-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .details-actions {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+    }
     .project-description {
         color: #4b5563;
         white-space: pre-wrap;
@@ -96,9 +108,51 @@
         border-radius: 6px;
         padding: 0.55rem 0.65rem;
     }
+    .link-item-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+    }
     .link-name {
         font-weight: 600;
         margin-bottom: 0.2rem;
+    }
+    .inline-actions {
+        display: inline-flex;
+        gap: 0.35rem;
+        align-items: center;
+    }
+    .btn-inline {
+        width: auto;
+        padding: 0.22rem 0.5rem;
+        background: #fff;
+        color: #344054;
+        border: 1px solid #dce3eb;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        cursor: pointer;
+    }
+    .btn-inline:hover {
+        background: #f5f7fa;
+    }
+    .btn-inline-danger {
+        width: auto;
+        padding: 0.22rem 0.5rem;
+        background: #fff5f5;
+        color: #8a1f1f;
+        border: 1px solid #f0b4b4;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        cursor: pointer;
+    }
+    .btn-inline-danger:hover {
+        background: #ffe8e8;
+    }
+    .inline-form {
+        display: inline;
+        margin: 0;
     }
     .empty-note {
         color: #5a6570;
@@ -172,7 +226,18 @@
 
         <section class="panel project-details">
             {% if selected_project %}
-                <h2>{{ selected_project.name }}</h2>
+                <div class="details-header">
+                    <h2>{{ selected_project.name }}</h2>
+                    <div class="details-actions">
+                        <button type="button" class="btn-inline open-edit-project-modal" data-project-id="{{ selected_project.pk }}" data-project-name="{{ selected_project.name }}" data-project-description="{{ selected_project.description|default:'' }}">Edit project</button>
+                        <form method="post" class="inline-form" onsubmit="return confirm('Delete this project and all its links?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="delete_project">
+                            <input type="hidden" name="project_id" value="{{ selected_project.pk }}">
+                            <button type="submit" class="btn-inline-danger">Delete project</button>
+                        </form>
+                    </div>
+                </div>
                 {% if selected_project.description %}
                     <p class="project-description">{{ selected_project.description }}</p>
                 {% else %}
@@ -188,7 +253,18 @@
                     <ul class="link-list">
                         {% for link in selected_project.links.all %}
                             <li>
-                                <div class="link-name">{{ link.name }}</div>
+                                <div class="link-item-top">
+                                    <div class="link-name">{{ link.name }}</div>
+                                    <div class="inline-actions">
+                                        <button type="button" class="btn-inline open-edit-link-modal" data-link-id="{{ link.pk }}" data-link-name="{{ link.name }}" data-link-url="{{ link.url }}">Edit</button>
+                                        <form method="post" class="inline-form" onsubmit="return confirm('Delete this project link?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_link">
+                                            <input type="hidden" name="link_id" value="{{ link.pk }}">
+                                            <button type="submit" class="btn-inline-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
                                 <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.url }}</a>
                             </li>
                         {% endfor %}
@@ -245,19 +321,97 @@
         </div>
     </div>
 
+    <div class="modal-overlay{% if open_edit_project_modal %} open{% endif %}" id="edit-project-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-project-modal-title">
+            <div class="modal-header">
+                <h2 id="edit-project-modal-title">Edit project</h2>
+                <button type="button" class="close-btn" id="close-edit-project-modal">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="edit_project">
+                {% for field in edit_project_form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+                {% for field in edit_project_form.visible_fields %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                {% if edit_project_form.non_field_errors %}
+                    <div class="errors">{{ edit_project_form.non_field_errors }}</div>
+                {% endif %}
+                <button type="submit">Save changes</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay{% if open_edit_link_modal %} open{% endif %}" id="edit-link-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-link-modal-title">
+            <div class="modal-header">
+                <h2 id="edit-link-modal-title">Edit project link</h2>
+                <button type="button" class="close-btn" id="close-edit-link-modal">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="edit_link">
+                {% for field in edit_project_link_form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+                {% for field in edit_project_link_form.visible_fields %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                {% if edit_project_link_form.non_field_errors %}
+                    <div class="errors">{{ edit_project_link_form.non_field_errors }}</div>
+                {% endif %}
+                <button type="submit">Save changes</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         (function () {
             var projectOverlay = document.getElementById("project-modal-overlay");
             var linkOverlay = document.getElementById("link-modal-overlay");
+            var editProjectOverlay = document.getElementById("edit-project-modal-overlay");
+            var editLinkOverlay = document.getElementById("edit-link-modal-overlay");
             var openProjectBtn = document.getElementById("open-project-modal");
             var openLinkBtn = document.getElementById("open-link-modal");
             var closeProjectBtn = document.getElementById("close-project-modal");
             var closeLinkBtn = document.getElementById("close-link-modal");
+            var closeEditProjectBtn = document.getElementById("close-edit-project-modal");
+            var closeEditLinkBtn = document.getElementById("close-edit-link-modal");
+            var editProjectIdInput = document.getElementById("id_editproject-project_id");
+            var editProjectNameInput = document.getElementById("id_editproject-name");
+            var editProjectDescriptionInput = document.getElementById("id_editproject-description");
+            var editLinkIdInput = document.getElementById("id_editlink-link_id");
+            var editLinkNameInput = document.getElementById("id_editlink-name");
+            var editLinkUrlInput = document.getElementById("id_editlink-url");
 
             function openProjectModal() { projectOverlay.classList.add("open"); }
             function closeProjectModal() { projectOverlay.classList.remove("open"); }
             function openLinkModal() { linkOverlay.classList.add("open"); }
             function closeLinkModal() { linkOverlay.classList.remove("open"); }
+            function openEditProjectModal(projectId, projectName, projectDescription) {
+                if (editProjectIdInput) editProjectIdInput.value = projectId;
+                if (editProjectNameInput) editProjectNameInput.value = projectName || "";
+                if (editProjectDescriptionInput) editProjectDescriptionInput.value = projectDescription || "";
+                editProjectOverlay.classList.add("open");
+            }
+            function closeEditProjectModal() { editProjectOverlay.classList.remove("open"); }
+            function openEditLinkModal(linkId, linkName, linkUrl) {
+                if (editLinkIdInput) editLinkIdInput.value = linkId;
+                if (editLinkNameInput) editLinkNameInput.value = linkName || "";
+                if (editLinkUrlInput) editLinkUrlInput.value = linkUrl || "";
+                editLinkOverlay.classList.add("open");
+            }
+            function closeEditLinkModal() { editLinkOverlay.classList.remove("open"); }
 
             openProjectBtn.addEventListener("click", openProjectModal);
             if (openLinkBtn) {
@@ -265,6 +419,27 @@
             }
             closeProjectBtn.addEventListener("click", closeProjectModal);
             closeLinkBtn.addEventListener("click", closeLinkModal);
+            closeEditProjectBtn.addEventListener("click", closeEditProjectModal);
+            closeEditLinkBtn.addEventListener("click", closeEditLinkModal);
+
+            document.querySelectorAll(".open-edit-project-modal").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    openEditProjectModal(
+                        btn.getAttribute("data-project-id"),
+                        btn.getAttribute("data-project-name"),
+                        btn.getAttribute("data-project-description")
+                    );
+                });
+            });
+            document.querySelectorAll(".open-edit-link-modal").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    openEditLinkModal(
+                        btn.getAttribute("data-link-id"),
+                        btn.getAttribute("data-link-name"),
+                        btn.getAttribute("data-link-url")
+                    );
+                });
+            });
 
             projectOverlay.addEventListener("click", function (e) {
                 if (e.target === projectOverlay) closeProjectModal();
@@ -272,11 +447,19 @@
             linkOverlay.addEventListener("click", function (e) {
                 if (e.target === linkOverlay) closeLinkModal();
             });
+            editProjectOverlay.addEventListener("click", function (e) {
+                if (e.target === editProjectOverlay) closeEditProjectModal();
+            });
+            editLinkOverlay.addEventListener("click", function (e) {
+                if (e.target === editLinkOverlay) closeEditLinkModal();
+            });
 
             document.addEventListener("keydown", function (e) {
                 if (e.key === "Escape") {
                     closeProjectModal();
                     closeLinkModal();
+                    closeEditProjectModal();
+                    closeEditLinkModal();
                 }
             });
         })();

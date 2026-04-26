@@ -2,17 +2,20 @@
 
 {% block title %}Dashboard | Student Productivity Hub{% endblock %}
 
-{% block container_class %} wide{% endblock %}
+{% block container_class %} wide dashboard-wide{% endblock %}
 
 {% block extra_head %}
 <style>
+    .container.dashboard-wide {
+        max-width: 1320px;
+    }
     .dash-header {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1rem;
         padding-bottom: 1rem;
         border-bottom: 1px solid #e5eaf0;
     }
@@ -20,10 +23,123 @@
     .dash-sub { color: #5a6570; margin: 0.35rem 0 0 0; font-size: 0.95rem; }
     .dash-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
     .user-label { font-size: 0.9rem; color: #444; }
+
+    .calendar-panel {
+        border: 1px solid #dce3eb;
+        border-radius: 8px;
+        background: #fafbfd;
+        padding: 1rem;
+    }
+    .dashboard-layout {
+        display: grid;
+        grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.6fr);
+        gap: 1rem;
+        align-items: start;
+    }
+    @media (max-width: 1060px) {
+        .dashboard-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    .calendar-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.8rem;
+    }
+    .toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .month-title {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    .btn-nav {
+        display: inline-block;
+        text-decoration: none;
+        padding: 0.35rem 0.65rem;
+        border: 1px solid #dce3eb;
+        border-radius: 6px;
+        background: #fff;
+        color: #344054;
+    }
+    .btn-nav:hover {
+        background: #f0f6ff;
+        border-color: #1f6feb;
+    }
+    .btn-small {
+        width: auto;
+        padding: 0.45rem 0.85rem;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 0.5rem;
+    }
+    .weekday {
+        text-align: center;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #5a6570;
+        padding: 0.35rem 0;
+    }
+    .day-cell {
+        min-height: 88px;
+        border: 1px solid #dce3eb;
+        border-radius: 6px;
+        background: #fff;
+        padding: 0.32rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .day-cell.empty {
+        background: #f7f9fc;
+        border-style: dashed;
+    }
+    .day-number {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
+    }
+    .day-items {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .day-item {
+        font-size: 0.7rem;
+        border-radius: 4px;
+        padding: 0.12rem 0.25rem;
+        line-height: 1.25;
+        word-break: break-word;
+    }
+    .day-item.assignment {
+        background: #e8f1ff;
+        border: 1px solid #b9d3ff;
+    }
+    .day-item.event {
+        background: #eaf8ef;
+        border: 1px solid #bde9ca;
+    }
+    .day-item a {
+        color: inherit;
+        text-decoration: underline;
+    }
+
     .card-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 1rem;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
     .card {
         display: block;
@@ -49,6 +165,43 @@
         color: #5a6570;
         line-height: 1.4;
     }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: 2000;
+    }
+    .modal-overlay.open {
+        display: flex;
+    }
+    .modal {
+        width: 100%;
+        max-width: 480px;
+        background: #fff;
+        border: 1px solid #dce3eb;
+        border-radius: 10px;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    .close-btn {
+        width: auto;
+        padding: 0.35rem 0.6rem;
+        background: #fff;
+        color: #344054;
+        border: 1px solid #dce3eb;
+    }
 </style>
 {% endblock %}
 
@@ -56,7 +209,7 @@
 <div class="dash-header">
     <div>
         <h1>Welcome{% if user.is_authenticated %}, {{ user.get_username }}{% endif %}</h1>
-        <p class="dash-sub">Jump into courses, assignments, projects, resources, or your calendar.</p>
+        <p class="dash-sub">Your month at a glance: assignment due dates and personal events.</p>
     </div>
     <div class="dash-actions">
         {% if user.email %}
@@ -66,26 +219,101 @@
     </div>
 </div>
 
-<div class="card-grid">
-    <a class="card" href="{% url 'courses:home' %}">
-        <h2>Courses &amp; environments</h2>
-        <p>Link textbooks, LMS links, and class spaces.</p>
-    </a>
-    <a class="card" href="{% url 'assignments:home' %}">
-        <h2>Assignments</h2>
-        <p>Track coursework and deadlines.</p>
-    </a>
-    <a class="card" href="{% url 'projects:home' %}">
-        <h2>Projects</h2>
-        <p>Organize longer-term work and milestones.</p>
-    </a>
-    <a class="card" href="{% url 'resources:home' %}">
-        <h2>Learning resources</h2>
-        <p>Save readings, videos, and reference material.</p>
-    </a>
-    <a class="card" href="{% url 'calendar:home' %}">
-        <h2>Calendar</h2>
-        <p>Add due dates and see what is coming up.</p>
-    </a>
+<div class="dashboard-layout">
+    <aside class="card-grid">
+        <a class="card" href="{% url 'courses:home' %}">
+            <h2>Courses &amp; environments</h2>
+            <p>Link textbooks, LMS links, and class spaces.</p>
+        </a>
+        <a class="card" href="{% url 'assignments:home' %}">
+            <h2>Assignments</h2>
+            <p>Track coursework and deadlines.</p>
+        </a>
+        <a class="card" href="{% url 'projects:home' %}">
+            <h2>Projects</h2>
+            <p>Organize longer-term work and milestones.</p>
+        </a>
+        <a class="card" href="{% url 'resources:home' %}">
+            <h2>Learning resources</h2>
+            <p>Save readings, videos, and reference material.</p>
+        </a>
+    </aside>
+
+    <section class="calendar-panel">
+        <div class="calendar-toolbar">
+            <div class="toolbar-left">
+                <a class="btn-nav" href="{{ prev_month_url }}">&larr;</a>
+                <h2 class="month-title">{{ calendar_month_label }}</h2>
+                <a class="btn-nav" href="{{ next_month_url }}">&rarr;</a>
+            </div>
+            <button type="button" class="btn-small" id="open-event-modal">Add event</button>
+    </div>
+
+        <div class="calendar-grid">
+            {% for weekday in weekday_labels %}
+                <div class="weekday">{{ weekday }}</div>
+            {% endfor %}
+
+            {% for week in calendar_weeks %}
+                {% for cell in week %}
+                    <div class="day-cell{% if not cell.day %} empty{% endif %}">
+                        {% if cell.day %}
+                            <div class="day-number">{{ cell.day }}</div>
+                            {% if cell.items %}
+                                <ul class="day-items">
+                                    {% for item in cell.items %}
+                                        <li class="day-item {{ item.kind }}">
+                                            {% if item.url %}
+                                                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+                                            {% else %}
+                                                {{ item.title }}
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </section>
 </div>
+
+<div class="modal-overlay{% if open_event_modal %} open{% endif %}" id="event-modal-overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+        <div class="modal-header">
+            <h2 id="event-modal-title">Add calendar event</h2>
+            <button type="button" class="close-btn" id="close-event-modal">Close</button>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="add_event">
+            {{ event_form.as_p }}
+            <button type="submit">Save event</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var overlay = document.getElementById("event-modal-overlay");
+        var openBtn = document.getElementById("open-event-modal");
+        var closeBtn = document.getElementById("close-event-modal");
+
+        function openModal() { overlay.classList.add("open"); }
+        function closeModal() { overlay.classList.remove("open"); }
+
+        openBtn.addEventListener("click", openModal);
+        closeBtn.addEventListener("click", closeModal);
+
+        overlay.addEventListener("click", function (e) {
+            if (e.target === overlay) closeModal();
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") closeModal();
+        });
+    })();
+</script>
 {% endblock %}
