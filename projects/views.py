@@ -4,6 +4,15 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
+from notes.forms import NoteCreateForm, NoteEditForm
+from notes.services import (
+    allowed_content_types,
+    create_note_for_target,
+    delete_note_for_user,
+    notes_by_target,
+    notes_for_target,
+    update_note_for_user,
+)
 from .forms import EditProjectForm, EditProjectLinkForm, ProjectForm, ProjectLinkForm
 from .models import Project, ProjectLink
 
@@ -32,6 +41,8 @@ class HomeView(LoginRequiredMixin, TemplateView):
         context['projects'] = projects
         context['selected_project'] = selected_project
         context['project_form'] = kwargs.get('project_form', ProjectForm(prefix='project'))
+        context['note_form'] = NoteCreateForm()
+        context['note_edit_form'] = NoteEditForm()
 
         if selected_project:
             context['project_link_form'] = kwargs.get(
@@ -56,6 +67,11 @@ class HomeView(LoginRequiredMixin, TemplateView):
             'edit_project_link_form',
             EditProjectLinkForm(prefix='editlink', user=self.request.user),
         )
+        ct_map = allowed_content_types()
+        context["ct_project_id"] = ct_map[Project].id
+        if selected_project:
+            grouped_notes = notes_by_target(self.request.user, [selected_project])
+            selected_project.notes_list = notes_for_target(grouped_notes, selected_project)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -148,5 +164,61 @@ class HomeView(LoginRequiredMixin, TemplateView):
                 messages.success(request, 'Project link deleted.')
                 return redirect(f"{self.success_url}?project={project_id}")
             return redirect(self.success_url)
+
+        if form_type == "add_note":
+            form = NoteCreateForm(request.POST)
+            selected_project_id = request.POST.get("project_context")
+            redirect_url = self.success_url
+            if selected_project_id:
+                redirect_url = f"{self.success_url}?project={selected_project_id}"
+            if form.is_valid():
+                note = create_note_for_target(
+                    user=request.user,
+                    content_type_id=request.POST.get("content_type_id"),
+                    object_id=request.POST.get("object_id"),
+                    body=form.cleaned_data["body"],
+                )
+                if note:
+                    messages.success(request, "Note added.")
+                else:
+                    messages.error(request, "Unable to attach note to that item.")
+            else:
+                messages.error(request, "Note cannot be empty.")
+            return redirect(redirect_url)
+
+        if form_type == "edit_note":
+            form = NoteEditForm(request.POST)
+            selected_project_id = request.POST.get("project_context")
+            redirect_url = self.success_url
+            if selected_project_id:
+                redirect_url = f"{self.success_url}?project={selected_project_id}"
+            if form.is_valid():
+                note = update_note_for_user(
+                    user=request.user,
+                    note_id=form.cleaned_data["note_id"],
+                    body=form.cleaned_data["body"],
+                )
+                if note:
+                    messages.success(request, "Note updated.")
+                else:
+                    messages.error(request, "Unable to update that note.")
+            else:
+                messages.error(request, "Note update failed.")
+            return redirect(redirect_url)
+
+        if form_type == "delete_note":
+            selected_project_id = request.POST.get("project_context")
+            redirect_url = self.success_url
+            if selected_project_id:
+                redirect_url = f"{self.success_url}?project={selected_project_id}"
+            deleted = delete_note_for_user(
+                user=request.user,
+                note_id=request.POST.get("note_id"),
+            )
+            if deleted:
+                messages.success(request, "Note deleted.")
+            else:
+                messages.error(request, "Unable to delete that note.")
+            return redirect(redirect_url)
 
         return redirect(self.success_url)

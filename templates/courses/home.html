@@ -109,6 +109,54 @@
         color: #5a6570;
         font-size: 0.9rem;
     }
+    .notes-block {
+        margin-top: 0.6rem;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.55rem;
+    }
+    .notes-block h4 {
+        margin: 0 0 0.35rem;
+        font-size: 0.86rem;
+        color: #445;
+    }
+    .notes-list {
+        list-style: none;
+        margin: 0 0 0.45rem;
+        padding: 0;
+        display: grid;
+        gap: 0.3rem;
+    }
+    .notes-list li {
+        border: 1px solid #dce3eb;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.35rem 0.45rem;
+        font-size: 0.83rem;
+    }
+    .note-line { margin-bottom: 0.25rem; }
+    .note-actions { display: flex; justify-content: flex-end; gap: 0.3rem; flex-wrap: wrap; align-items: center; }
+    .note-actions button { width: auto; padding: 0.2rem 0.45rem; font-size: 0.76rem; }
+    .note-edit-form { display: none; margin-top: 0.3rem; }
+    .note-edit-form.open { display: block; }
+    .note-add-toggle {
+        width: auto;
+        padding: 0.16rem 0.42rem;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    .note-form textarea {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 52px;
+        resize: vertical;
+    }
+    .note-form button {
+        width: auto;
+        margin-top: 0.35rem;
+        padding: 0.35rem 0.7rem;
+    }
+    .note-add-form { display: none; margin-top: 0.35rem; }
+    .note-add-form.open { display: block; }
     .empty-note {
         color: #5a6570;
         margin-top: 1rem;
@@ -201,6 +249,43 @@
                             <button type="button" class="btn-secondary open-textbook-modal" data-course-id="{{ course.pk }}">Add textbook</button>
                         </div>
                     </div>
+                    <div class="notes-block">
+                        <h4>Notes</h4>
+                        {% if course.notes_list %}
+                            <ul class="notes-list">
+                                {% for note in course.notes_list %}
+                                    <li>
+                                        <div class="note-line">{{ note.body }}</div>
+                                        <div class="note-actions">
+                                            <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="form_type" value="delete_note">
+                                                <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                                <button type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                        <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="edit_note">
+                                            <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                            <textarea name="body">{{ note.body }}</textarea>
+                                            <button type="submit">Update note</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-course-{{ course.pk }}">Add note</button>
+                        <form method="post" class="note-form note-add-form" id="note-add-course-{{ course.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="add_note">
+                            <input type="hidden" name="content_type_id" value="{{ ct_course_id }}">
+                            <input type="hidden" name="object_id" value="{{ course.pk }}">
+                            <textarea name="body" placeholder="Add a note for this course"></textarea>
+                            <button type="submit">Save note</button>
+                        </form>
+                    </div>
                     {% with books=course.textbooks.all %}
                         {% if books %}
                             <ul class="textbook-list">
@@ -211,6 +296,43 @@
                                         {% else %}
                                             {{ book.title }}
                                         {% endif %}
+                                        <div class="notes-block">
+                                            <h4>Textbook notes</h4>
+                                            {% if book.notes_list %}
+                                                <ul class="notes-list">
+                                                    {% for note in book.notes_list %}
+                                                        <li>
+                                                            <div class="note-line">{{ note.body }}</div>
+                                                            <div class="note-actions">
+                                                                <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
+                                                                <form method="post">
+                                                                    {% csrf_token %}
+                                                                    <input type="hidden" name="form_type" value="delete_note">
+                                                                    <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                                                    <button type="submit">Delete</button>
+                                                                </form>
+                                                            </div>
+                                                            <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="form_type" value="edit_note">
+                                                                <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                                                <textarea name="body">{{ note.body }}</textarea>
+                                                                <button type="submit">Update note</button>
+                                                            </form>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-textbook-{{ book.pk }}">Add note</button>
+                                            <form method="post" class="note-form note-add-form" id="note-add-textbook-{{ book.pk }}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="form_type" value="add_note">
+                                                <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
+                                                <input type="hidden" name="object_id" value="{{ book.pk }}">
+                                                <textarea name="body" placeholder="Add a note for this textbook"></textarea>
+                                                <button type="submit">Save note</button>
+                                            </form>
+                                        </div>
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -352,6 +474,16 @@
                 courseField.value = "{{ textbook_course_id }}";
             }
             {% endif %}
+
+            document.querySelectorAll(".note-edit-toggle").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var targetId = btn.getAttribute("data-target");
+                    var form = document.getElementById(targetId);
+                    if (form) {
+                        form.classList.toggle("open");
+                    }
+                });
+            });
         })();
     </script>
 {% endblock %}

@@ -158,6 +158,53 @@
         color: #5a6570;
         margin-top: 0.5rem;
     }
+    .notes-block {
+        margin-top: 0.8rem;
+        border-top: 1px solid #e5eaf0;
+        padding-top: 0.6rem;
+    }
+    .notes-block h3 {
+        margin: 0 0 0.35rem;
+        font-size: 0.92rem;
+    }
+    .notes-list {
+        list-style: none;
+        margin: 0 0 0.45rem;
+        padding: 0;
+        display: grid;
+        gap: 0.3rem;
+    }
+    .notes-list li {
+        border: 1px solid #dce3eb;
+        background: #fafbfd;
+        border-radius: 6px;
+        padding: 0.35rem 0.45rem;
+        font-size: 0.84rem;
+    }
+    .note-line { margin-bottom: 0.2rem; }
+    .note-actions { display: flex; justify-content: flex-end; gap: 0.3rem; align-items: center; flex-wrap: wrap; }
+    .note-actions button { width: auto; padding: 0.2rem 0.45rem; font-size: 0.76rem; }
+    .note-edit-form { display: none; margin-top: 0.3rem; }
+    .note-edit-form.open { display: block; }
+    .note-add-toggle {
+        width: auto;
+        padding: 0.16rem 0.42rem;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    .note-form textarea {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 54px;
+        resize: vertical;
+    }
+    .note-form button {
+        width: auto;
+        margin-top: 0.35rem;
+        padding: 0.35rem 0.7rem;
+    }
+    .note-add-form { display: none; margin-top: 0.35rem; }
+    .note-add-form.open { display: block; }
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -243,6 +290,46 @@
                 {% else %}
                     <p class="project-description">No project description yet.</p>
                 {% endif %}
+                <div class="notes-block">
+                    <h3>Notes</h3>
+                    {% if selected_project.notes_list %}
+                        <ul class="notes-list">
+                            {% for note in selected_project.notes_list %}
+                                <li>
+                                    <div class="note-line">{{ note.body }}</div>
+                                    <div class="note-actions">
+                                        <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_note">
+                                            <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                            <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                                            <button type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                    <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_type" value="edit_note">
+                                        <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                                        <textarea name="body">{{ note.body }}</textarea>
+                                        <button type="submit">Update note</button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-project-{{ selected_project.pk }}">Add note</button>
+                    <form method="post" class="note-form note-add-form" id="note-add-project-{{ selected_project.pk }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_note">
+                        <input type="hidden" name="content_type_id" value="{{ ct_project_id }}">
+                        <input type="hidden" name="object_id" value="{{ selected_project.pk }}">
+                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                        <textarea name="body" placeholder="Add a note for this project"></textarea>
+                        <button type="submit">Save note</button>
+                    </form>
+                </div>
 
                 <div class="link-header">
                     <h3>Project links</h3>
@@ -461,6 +548,16 @@
                     closeEditProjectModal();
                     closeEditLinkModal();
                 }
+            });
+
+            document.querySelectorAll(".note-edit-toggle").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var targetId = btn.getAttribute("data-target");
+                    var form = document.getElementById(targetId);
+                    if (form) {
+                        form.classList.toggle("open");
+                    }
+                });
             });
         })();
     </script>

@@ -11,6 +11,15 @@ from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView
 
+from notes.forms import NoteCreateForm, NoteEditForm
+from notes.services import (
+    allowed_content_types,
+    create_note_for_target,
+    delete_note_for_user,
+    notes_by_target,
+    notes_for_target,
+    update_note_for_user,
+)
 from .forms import AddResourceForm, EditResourceForm, RenameColumnForm
 from .models import ResourceColumn, ResourceItem
 
@@ -36,6 +45,17 @@ class HomeView(LoginRequiredMixin, TemplateView):
             .prefetch_related("items")
             .order_by("slot")
         )
+        context["note_form"] = NoteCreateForm()
+        context["note_edit_form"] = NoteEditForm()
+        ct_map = allowed_content_types()
+        context["ct_resource_item_id"] = ct_map[ResourceItem].id
+
+        resource_items = []
+        for column in context["columns"]:
+            resource_items.extend(list(column.items.all()))
+        grouped_notes = notes_by_target(self.request.user, resource_items)
+        for item in resource_items:
+            item.notes_list = notes_for_target(grouped_notes, item)
 
         if "rename_form" in kwargs:
             context["rename_form"] = kwargs["rename_form"]
@@ -122,6 +142,50 @@ class HomeView(LoginRequiredMixin, TemplateView):
             if item:
                 item.delete()
                 messages.success(request, "Resource removed.")
+            return redirect(self.success_url)
+
+        if form_type == "add_note":
+            form = NoteCreateForm(request.POST)
+            if form.is_valid():
+                note = create_note_for_target(
+                    user=request.user,
+                    content_type_id=request.POST.get("content_type_id"),
+                    object_id=request.POST.get("object_id"),
+                    body=form.cleaned_data["body"],
+                )
+                if note:
+                    messages.success(request, "Note added.")
+                else:
+                    messages.error(request, "Unable to attach note to that item.")
+            else:
+                messages.error(request, "Note cannot be empty.")
+            return redirect(self.success_url)
+
+        if form_type == "edit_note":
+            form = NoteEditForm(request.POST)
+            if form.is_valid():
+                note = update_note_for_user(
+                    user=request.user,
+                    note_id=form.cleaned_data["note_id"],
+                    body=form.cleaned_data["body"],
+                )
+                if note:
+                    messages.success(request, "Note updated.")
+                else:
+                    messages.error(request, "Unable to update that note.")
+            else:
+                messages.error(request, "Note update failed.")
+            return redirect(self.success_url)
+
+        if form_type == "delete_note":
+            deleted = delete_note_for_user(
+                user=request.user,
+                note_id=request.POST.get("note_id"),
+            )
+            if deleted:
+                messages.success(request, "Note deleted.")
+            else:
+                messages.error(request, "Unable to delete that note.")
             return redirect(self.success_url)
 
         return redirect(self.success_url)
