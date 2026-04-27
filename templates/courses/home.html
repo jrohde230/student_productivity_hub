@@ -28,7 +28,36 @@
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
+    }
+    .courses-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    @media (max-width: 920px) {
+        .courses-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    .course-list a {
+        display: block;
+        text-decoration: none;
+        color: #1f2937;
+        padding: 0.6rem 0.7rem;
+        border: 1px solid #dce3eb;
+        border-radius: 6px;
+        background: #fff;
+    }
+    .course-list a:hover {
+        border-color: #7c3aed;
+        background: #f3e8ff;
+    }
+    .course-list a.active {
+        border-color: #7c3aed;
+        background: #ede9fe;
+        font-weight: 600;
     }
     .course-card {
         border: 1px solid #dce3eb;
@@ -107,6 +136,13 @@
         border-color: #dc2626;
         color: #7f1d1d;
     }
+    .attachment-actions .btn-inline-danger:hover:not(:disabled) {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+        box-shadow: none;
+        filter: none;
+    }
     .textbook-list {
         list-style: none;
         margin: 0;
@@ -118,6 +154,56 @@
         padding: 0.35rem 0;
         font-size: 0.95rem;
     }
+    .textbook-entry-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+    }
+    .textbook-entry-title {
+        min-width: 0;
+        flex: 1 1 auto;
+        font-size: 1.16rem;
+        font-weight: 600;
+        line-height: 1.35;
+        color: #faf5ff;
+    }
+    .textbooks-section .textbook-entry-title a {
+        color: #faf5ff;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .textbooks-section .textbook-entry-title a:hover {
+        color: #ffffff;
+        text-decoration: underline;
+    }
+    .textbook-entry-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        flex-shrink: 0;
+    }
+    .textbook-delete-form {
+        display: inline;
+        margin: 0;
+    }
+    .textbooks-section .textbook-delete-form .btn-inline-danger:hover:not(:disabled) {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+        box-shadow: none;
+        filter: none;
+    }
+    .textbooks-section .textbook-entry-actions .btn-inline-danger {
+        padding: 0.32rem 0.6rem;
+        font-size: 0.86rem;
+        border-radius: 5px;
+        line-height: 1.25;
+        box-sizing: border-box;
+    }
     .textbook-list a {
         font-weight: 500;
     }
@@ -127,10 +213,54 @@
         color: #5a6570;
         font-size: 0.9rem;
     }
+    .textbooks-section {
+        margin-top: 0.75rem;
+        border: 1px solid #5b21b6;
+        border-radius: 8px;
+        background: #6d28d9;
+        padding: 0.65rem 0.75rem;
+    }
+    .textbooks-section > .section-title {
+        color: #faf5ff;
+    }
+    .textbooks-section .textbook-list {
+        border-top-color: rgba(250, 245, 255, 0.35);
+    }
+    .textbooks-section .textbook-list > li {
+        color: #ede9fe;
+    }
+    .textbooks-section .textbook-empty {
+        color: rgba(237, 233, 254, 0.95);
+    }
+    /* Textbook title row inherits lavender; notes/attachments cards use normal dark text */
+    .textbooks-section .notes-block,
+    .textbooks-section .notes-block .note-line,
+    .textbooks-section .notes-block textarea {
+        color: #111827;
+    }
+    .textbooks-section .tags-block-plain {
+        margin-top: 0.5rem;
+        border-top: 1px solid rgba(250, 245, 255, 0.35);
+        padding-top: 0.45rem;
+    }
+    .textbooks-section .tags-block-plain .note-edit-toggle.note-add-toggle {
+        background: #ffffff;
+        color: #7c3aed;
+        border: 1px solid #e9d5ff;
+    }
+    .textbooks-section .tags-block-plain .note-edit-toggle.note-add-toggle:hover {
+        background: #faf5ff;
+        color: #6d28d9;
+        border-color: #ddd6fe;
+        filter: none;
+        box-shadow: 0 0 0 2px rgba(233, 213, 254, 0.65);
+    }
     .notes-block {
-        margin-top: 0.6rem;
-        border-top: 1px solid #eef2f6;
-        padding-top: 0.55rem;
+        margin-top: 0.75rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.55rem 0.6rem;
     }
     .notes-block h4 {
         margin: 0 0 0.35rem;
@@ -170,6 +300,16 @@
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
     }
+    .note-actions form button[type="submit"] {
+        background: #fff5f5;
+        border: 1px solid #f0b4b4;
+        color: #8a1f1f;
+    }
+    .note-actions form button[type="submit"]:hover {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+    }
     .note-form button:hover {
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
@@ -187,10 +327,22 @@
     }
     .note-add-form { display: none; margin-top: 0.35rem; }
     .note-add-form.open { display: block; }
+    /* Card-style tags (e.g. per textbook) */
     .tags-block {
-        margin-top: 0.55rem;
+        margin-top: 0.75rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.55rem 0.6rem;
+    }
+    /* Course-level tags: same pattern as assignments page (footer strip, not a card) */
+    .tags-block-plain {
+        margin-top: 0.5rem;
         border-top: 1px solid #eef2f6;
         padding-top: 0.45rem;
+    }
+    .tags-block-plain .tag-add-form {
+        margin-top: 0.25rem;
     }
     .tag-list {
         list-style: none;
@@ -236,9 +388,18 @@
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
     }
     .attachments-block {
-        margin-top: 0.55rem;
-        border-top: 1px solid #eef2f6;
-        padding-top: 0.45rem;
+        margin-top: 0.75rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.55rem 0.6rem;
+    }
+    .section-title {
+        margin: 0 0 0.45rem;
+        font-size: 0.85rem;
+        color: #4c1d95;
+        font-weight: 600;
+        letter-spacing: 0.01em;
     }
     .attachments-list {
         list-style: none;
@@ -359,40 +520,55 @@
     </div>
 
     {% if courses %}
-        <ul class="course-list">
-            {% for course in courses %}
-                <li class="course-card">
+        <div class="courses-layout">
+            <aside class="panel">
+                <h3 class="section-title">Course list</h3>
+                <ul class="course-list">
+                    {% for course in courses %}
+                        <li>
+                            <a href="{% url 'courses:home' %}?course={{ course.pk }}" class="{% if selected_course and selected_course.pk == course.pk %}active{% endif %}">
+                                {{ course.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+
+            {% if selected_course %}
+                <section class="course-card">
                     <div class="course-card-header">
                         <div class="course-title-block">
-                            {% if course.course_url %}
-                                <h2 class="course-name"><a class="course-name-link" href="{{ course.course_url }}" target="_blank" rel="noopener noreferrer">{{ course.name }}</a></h2>
+                            {% if selected_course.course_url %}
+                                <h2 class="course-name"><a class="course-name-link" href="{{ selected_course.course_url }}" target="_blank" rel="noopener noreferrer">{{ selected_course.name }}</a></h2>
                             {% else %}
-                                <h2 class="course-name">{{ course.name }}</h2>
+                                <h2 class="course-name">{{ selected_course.name }}</h2>
                             {% endif %}
-                            {% if course.instructor_name or course.instructor_email %}
+                            {% if selected_course.instructor_name or selected_course.instructor_email %}
                                 <p class="instructor-line">
-                                    {% if course.instructor_name %}Instructor: {{ course.instructor_name }}{% endif %}
-                                    {% if course.instructor_name and course.instructor_email %} · {% endif %}
-                                    {% if course.instructor_email %}<a href="mailto:{{ course.instructor_email }}">{{ course.instructor_email }}</a>{% endif %}
+                                    {% if selected_course.instructor_name %}Instructor: {{ selected_course.instructor_name }}{% endif %}
+                                    {% if selected_course.instructor_name and selected_course.instructor_email %} · {% endif %}
+                                    {% if selected_course.instructor_email %}<a href="mailto:{{ selected_course.instructor_email }}">{{ selected_course.instructor_email }}</a>{% endif %}
                                 </p>
                             {% endif %}
                         </div>
                         <div class="course-card-actions">
-                            <a class="btn-secondary" href="{% url 'courses:home' %}?edit={{ course.pk }}">Edit course</a>
-                            <button type="button" class="btn-secondary open-textbook-modal" data-course-id="{{ course.pk }}">Add textbook</button>
+                            <a class="btn-secondary" href="{% url 'courses:home' %}?edit={{ selected_course.pk }}&course={{ selected_course.pk }}">Edit course</a>
+                            <button type="button" class="btn-secondary open-textbook-modal" data-course-id="{{ selected_course.pk }}">Add textbook</button>
                         </div>
                     </div>
+
                     <div class="notes-block">
-                        <h4>Notes</h4>
-                        {% if course.notes_list %}
+                        <h3 class="section-title">Course notes</h3>
+                        {% if selected_course.notes_list %}
                             <ul class="notes-list">
-                                {% for note in course.notes_list %}
+                                {% for note in selected_course.notes_list %}
                                     <li>
                                         <div class="note-line">{{ note.body }}</div>
                                         <div class="note-actions">
                                             <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
                                             <form method="post">
                                                 {% csrf_token %}
+                                                <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
                                                 <input type="hidden" name="form_type" value="delete_note">
                                                 <input type="hidden" name="note_id" value="{{ note.pk }}">
                                                 <button type="submit">Delete</button>
@@ -400,6 +576,7 @@
                                         </div>
                                         <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
                                             {% csrf_token %}
+                                            <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
                                             <input type="hidden" name="form_type" value="edit_note">
                                             <input type="hidden" name="note_id" value="{{ note.pk }}">
                                             <textarea name="body">{{ note.body }}</textarea>
@@ -409,42 +586,28 @@
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-course-{{ course.pk }}">Add note</button>
-                        <form method="post" class="note-form note-add-form" id="note-add-course-{{ course.pk }}">
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-course-{{ selected_course.pk }}">Add note</button>
+                        <form method="post" class="note-form note-add-form" id="note-add-course-{{ selected_course.pk }}">
                             {% csrf_token %}
+                            <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
                             <input type="hidden" name="form_type" value="add_note">
                             <input type="hidden" name="content_type_id" value="{{ ct_course_id }}">
-                            <input type="hidden" name="object_id" value="{{ course.pk }}">
+                            <input type="hidden" name="object_id" value="{{ selected_course.pk }}">
                             <textarea name="body" placeholder="Add a note for this course"></textarea>
                             <button type="submit">Save note</button>
                         </form>
                     </div>
-                    <div class="tags-block">
-                        {% if course.tags_list %}
-                            <ul class="tag-list">
-                                {% for tag in course.tags_list %}
-                                    <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-course-{{ course.pk }}">Add tag</button>
-                        <form method="post" class="tag-add-form" id="tag-add-course-{{ course.pk }}">
-                            {% csrf_token %}
-                            <input type="hidden" name="form_type" value="add_tag">
-                            <input type="hidden" name="content_type_id" value="{{ ct_course_id }}">
-                            <input type="hidden" name="object_id" value="{{ course.pk }}">
-                            <input type="text" name="label" placeholder="#math">
-                            <button type="submit">Save tag</button>
-                        </form>
-                    </div>
+
                     <div class="attachments-block">
-                        {% if course.attachments_list %}
+                        <h3 class="section-title">Course attachments</h3>
+                        {% if selected_course.attachments_list %}
                             <ul class="attachments-list">
-                                {% for attachment in course.attachments_list %}
+                                {% for attachment in selected_course.attachments_list %}
                                     <li>
                                         <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
                                         <form method="post" class="attachment-actions">
                                             {% csrf_token %}
+                                            <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
                                             <input type="hidden" name="form_type" value="delete_attachment">
                                             <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
                                             <button type="submit" class="btn-inline-danger">Remove</button>
@@ -453,117 +616,163 @@
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-course-{{ course.pk }}">Add attachment</button>
-                        <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-course-{{ course.pk }}">
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-course-{{ selected_course.pk }}">Add attachment</button>
+                        <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-course-{{ selected_course.pk }}">
                             {% csrf_token %}
+                            <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
                             <input type="hidden" name="form_type" value="add_attachment">
                             <input type="hidden" name="content_type_id" value="{{ ct_course_id }}">
-                            <input type="hidden" name="object_id" value="{{ course.pk }}">
+                            <input type="hidden" name="object_id" value="{{ selected_course.pk }}">
                             <input type="file" name="file">
                             <button type="submit">Upload file</button>
                         </form>
                     </div>
-                    {% with books=course.textbooks.all %}
-                        {% if books %}
-                            <ul class="textbook-list">
-                                {% for book in books %}
-                                    <li>
-                                        {% if book.url %}
-                                            <a href="{{ book.url }}" target="_blank" rel="noopener noreferrer">{{ book.title }}</a>
-                                        {% else %}
-                                            {{ book.title }}
-                                        {% endif %}
-                                        <div class="notes-block">
-                                            <h4>Textbook notes</h4>
-                                            {% if book.notes_list %}
-                                                <ul class="notes-list">
-                                                    {% for note in book.notes_list %}
-                                                        <li>
-                                                            <div class="note-line">{{ note.body }}</div>
-                                                            <div class="note-actions">
-                                                                <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
-                                                                <form method="post">
-                                                                    {% csrf_token %}
-                                                                    <input type="hidden" name="form_type" value="delete_note">
-                                                                    <input type="hidden" name="note_id" value="{{ note.pk }}">
-                                                                    <button type="submit">Delete</button>
-                                                                </form>
-                                                            </div>
-                                                            <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
-                                                                {% csrf_token %}
-                                                                <input type="hidden" name="form_type" value="edit_note">
-                                                                <input type="hidden" name="note_id" value="{{ note.pk }}">
-                                                                <textarea name="body">{{ note.body }}</textarea>
-                                                                <button type="submit">Update note</button>
-                                                            </form>
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% endif %}
-                                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-textbook-{{ book.pk }}">Add note</button>
-                                            <form method="post" class="note-form note-add-form" id="note-add-textbook-{{ book.pk }}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="form_type" value="add_note">
-                                                <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
-                                                <input type="hidden" name="object_id" value="{{ book.pk }}">
-                                                <textarea name="body" placeholder="Add a note for this textbook"></textarea>
-                                                <button type="submit">Save note</button>
-                                            </form>
-                                        </div>
-                                        <div class="tags-block">
-                                            {% if book.tags_list %}
-                                                <ul class="tag-list">
-                                                    {% for tag in book.tags_list %}
-                                                        <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% endif %}
-                                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-textbook-{{ book.pk }}">Add tag</button>
-                                            <form method="post" class="tag-add-form" id="tag-add-textbook-{{ book.pk }}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="form_type" value="add_tag">
-                                                <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
-                                                <input type="hidden" name="object_id" value="{{ book.pk }}">
-                                                <input type="text" name="label" placeholder="#math">
-                                                <button type="submit">Save tag</button>
-                                            </form>
-                                        </div>
-                                        <div class="attachments-block">
-                                            {% if book.attachments_list %}
-                                                <ul class="attachments-list">
-                                                    {% for attachment in book.attachments_list %}
-                                                        <li>
-                                                            <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
-                                                            <form method="post" class="attachment-actions">
-                                                                {% csrf_token %}
-                                                                <input type="hidden" name="form_type" value="delete_attachment">
-                                                                <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
-                                                                <button type="submit" class="btn-inline-danger">Remove</button>
-                                                            </form>
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% endif %}
-                                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-textbook-{{ book.pk }}">Add attachment</button>
-                                            <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-textbook-{{ book.pk }}">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="form_type" value="add_attachment">
-                                                <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
-                                                <input type="hidden" name="object_id" value="{{ book.pk }}">
-                                                <input type="file" name="file">
-                                                <button type="submit">Upload file</button>
-                                            </form>
-                                        </div>
-                                    </li>
+
+                    <div class="tags-block-plain">
+                        {% if selected_course.tags_list %}
+                            <ul class="tag-list">
+                                {% for tag in selected_course.tags_list %}
+                                    <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="course_context" value="{{ selected_course.pk }}"><input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
                                 {% endfor %}
                             </ul>
-                        {% else %}
-                            <p class="textbook-empty">No textbooks linked yet.</p>
                         {% endif %}
-                    {% endwith %}
-                </li>
-            {% endfor %}
-        </ul>
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-course-{{ selected_course.pk }}">Add tag</button>
+                        <form method="post" class="tag-add-form" id="tag-add-course-{{ selected_course.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                            <input type="hidden" name="form_type" value="add_tag">
+                            <input type="hidden" name="content_type_id" value="{{ ct_course_id }}">
+                            <input type="hidden" name="object_id" value="{{ selected_course.pk }}">
+                            <input type="text" name="label" placeholder="#math">
+                            <button type="submit">Save tag</button>
+                        </form>
+                    </div>
+
+                    <div class="textbooks-section">
+                        <h3 class="section-title">Textbooks</h3>
+                        {% with books=selected_course.textbooks.all %}
+                            {% if books %}
+                                <ul class="textbook-list">
+                                    {% for book in books %}
+                                        <li>
+                                            <div class="textbook-entry-head">
+                                                <div class="textbook-entry-title">
+                                                    {% if book.url %}
+                                                        <a href="{{ book.url }}" target="_blank" rel="noopener noreferrer">{{ book.title }}</a>
+                                                    {% else %}
+                                                        {{ book.title }}
+                                                    {% endif %}
+                                                </div>
+                                                <div class="textbook-entry-actions">
+                                                    <a class="btn-secondary" href="{% url 'courses:home' %}?course={{ selected_course.pk }}&amp;edit_textbook={{ book.pk }}">Edit</a>
+                                                    <form method="post" class="textbook-delete-form">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="form_type" value="delete_textbook">
+                                                        <input type="hidden" name="textbook_id" value="{{ book.pk }}">
+                                                        <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                                                        <button type="submit" class="btn-inline-danger">Remove</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="notes-block">
+                                                <h4 class="section-title">Textbook notes</h4>
+                                                {% if book.notes_list %}
+                                                    <ul class="notes-list">
+                                                        {% for note in book.notes_list %}
+                                                            <li>
+                                                                <div class="note-line">{{ note.body }}</div>
+                                                                <div class="note-actions">
+                                                                    <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
+                                                                    <form method="post">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                                                                        <input type="hidden" name="form_type" value="delete_note">
+                                                                        <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                                                        <button type="submit">Delete</button>
+                                                                    </form>
+                                                                </div>
+                                                                <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
+                                                                    {% csrf_token %}
+                                                                    <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                                                                    <input type="hidden" name="form_type" value="edit_note">
+                                                                    <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                                                    <textarea name="body">{{ note.body }}</textarea>
+                                                                    <button type="submit">Update note</button>
+                                                                </form>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                                <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-textbook-{{ book.pk }}">Add note</button>
+                                                <form method="post" class="note-form note-add-form" id="note-add-textbook-{{ book.pk }}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                                                    <input type="hidden" name="form_type" value="add_note">
+                                                    <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
+                                                    <input type="hidden" name="object_id" value="{{ book.pk }}">
+                                                    <textarea name="body" placeholder="Add a note for this textbook"></textarea>
+                                                    <button type="submit">Save note</button>
+                                                </form>
+                                            </div>
+                                            <div class="attachments-block">
+                                                <h4 class="section-title">Textbook attachments</h4>
+                                                {% if book.attachments_list %}
+                                                    <ul class="attachments-list">
+                                                        {% for attachment in book.attachments_list %}
+                                                            <li>
+                                                                <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
+                                                                <form method="post" class="attachment-actions">
+                                                                    {% csrf_token %}
+                                                                    <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                                                                    <input type="hidden" name="form_type" value="delete_attachment">
+                                                                    <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
+                                                                    <button type="submit" class="btn-inline-danger">Remove</button>
+                                                                </form>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                                <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-textbook-{{ book.pk }}">Add attachment</button>
+                                                <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-textbook-{{ book.pk }}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                                                    <input type="hidden" name="form_type" value="add_attachment">
+                                                    <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
+                                                    <input type="hidden" name="object_id" value="{{ book.pk }}">
+                                                    <input type="file" name="file">
+                                                    <button type="submit">Upload file</button>
+                                                </form>
+                                            </div>
+                                            <div class="tags-block-plain">
+                                                {% if book.tags_list %}
+                                                    <ul class="tag-list">
+                                                        {% for tag in book.tags_list %}
+                                                            <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="course_context" value="{{ selected_course.pk }}"><input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                                <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-textbook-{{ book.pk }}">Add tag</button>
+                                                <form method="post" class="tag-add-form" id="tag-add-textbook-{{ book.pk }}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                                                    <input type="hidden" name="form_type" value="add_tag">
+                                                    <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
+                                                    <input type="hidden" name="object_id" value="{{ book.pk }}">
+                                                    <input type="text" name="label" placeholder="#math">
+                                                    <button type="submit">Save tag</button>
+                                                </form>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="textbook-empty">No textbooks linked yet.</p>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </section>
+            {% endif %}
+        </div>
     {% else %}
         <p class="empty-note">You have no courses yet. Click &quot;Add course&quot; to create your first one.</p>
     {% endif %}
@@ -627,15 +836,46 @@
         </div>
     </div>
 
+    <div class="modal-overlay{% if textbook_edit_modal_open or textbook_edit_errors %} open{% endif %}" id="edit-textbook-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-textbook-title">
+            <div class="modal-header">
+                <h2 id="edit-textbook-title">Edit textbook</h2>
+                <button type="button" class="close-btn" id="close-edit-textbook-modal">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="edit_textbook">
+                <input type="hidden" name="textbook_id" value="{{ edit_textbook_id }}">
+                {% if selected_course %}
+                    <input type="hidden" name="course_context" value="{{ selected_course.pk }}">
+                {% endif %}
+                {% if textbook_edit_form.non_field_errors %}
+                    <div class="errors">{{ textbook_edit_form.non_field_errors }}</div>
+                {% endif %}
+                <p class="field-hint">URL is optional—use it when the textbook has an online link.</p>
+                {% for field in textbook_edit_form.visible_fields %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                <button type="submit">Save changes</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         (function () {
             var courseOverlay = document.getElementById("course-modal-overlay");
             var editCourseOverlay = document.getElementById("edit-course-modal-overlay");
             var textbookOverlay = document.getElementById("textbook-modal-overlay");
+            var editTextbookOverlay = document.getElementById("edit-textbook-modal-overlay");
             var openCourseBtn = document.getElementById("open-course-modal");
             var closeCourseBtn = document.getElementById("close-course-modal");
             var closeEditCourseBtn = document.getElementById("close-edit-course-modal");
             var closeTextbookBtn = document.getElementById("close-textbook-modal");
+            var closeEditTextbookBtn = document.getElementById("close-edit-textbook-modal");
             var courseField = document.getElementById("id_course");
 
             function openCourseModal() {
@@ -653,6 +893,11 @@
             function closeTextbookModal() {
                 textbookOverlay.classList.remove("open");
             }
+            function closeEditTextbookModal() {
+                if (editTextbookOverlay) {
+                    editTextbookOverlay.classList.remove("open");
+                }
+            }
             function closeEditCourseModal() {
                 editCourseOverlay.classList.remove("open");
             }
@@ -663,6 +908,9 @@
                 closeEditCourseBtn.addEventListener("click", closeEditCourseModal);
             }
             closeTextbookBtn.addEventListener("click", closeTextbookModal);
+            if (closeEditTextbookBtn) {
+                closeEditTextbookBtn.addEventListener("click", closeEditTextbookModal);
+            }
 
             document.querySelectorAll(".open-textbook-modal").forEach(function (btn) {
                 btn.addEventListener("click", function () {
@@ -676,6 +924,11 @@
             textbookOverlay.addEventListener("click", function (e) {
                 if (e.target === textbookOverlay) closeTextbookModal();
             });
+            if (editTextbookOverlay) {
+                editTextbookOverlay.addEventListener("click", function (e) {
+                    if (e.target === editTextbookOverlay) closeEditTextbookModal();
+                });
+            }
             if (editCourseOverlay) {
                 editCourseOverlay.addEventListener("click", function (e) {
                     if (e.target === editCourseOverlay) closeEditCourseModal();
@@ -687,6 +940,7 @@
                     closeCourseModal();
                     closeEditCourseModal();
                     closeTextbookModal();
+                    closeEditTextbookModal();
                 }
             });
 

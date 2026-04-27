@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
@@ -27,7 +28,11 @@ from tags.services import (
     tags_by_target,
     tags_for_target,
 )
-from .forms import CourseForm, TextbookForm
+from attachments.models import Attachment
+from notes.models import Note
+from tags.models import Tag
+
+from .forms import CourseForm, EditTextbookForm, TextbookForm
 from .models import Course, Textbook
 
 
@@ -35,14 +40,29 @@ class HomeView(LoginRequiredMixin, TemplateView):
     template_name = "courses/home.html"
     success_url = reverse_lazy("courses:home")
 
+    def get_selected_course(self, courses, forced_course_id=None):
+        selected = None
+        if forced_course_id:
+            selected = next((c for c in courses if str(c.pk) == str(forced_course_id)), None)
+        if not selected:
+            course_id = self.request.GET.get("course")
+            if course_id:
+                selected = next((c for c in courses if str(c.pk) == str(course_id)), None)
+        if not selected and courses:
+            selected = courses[0]
+        return selected
+
     def get_context_data(self, **kwargs):
+        forced_course_id = kwargs.pop("force_course_id", None)
         context = super().get_context_data(**kwargs)
         courses = list(
             Course.objects.filter(user=self.request.user)
             .prefetch_related("textbooks")
             .order_by("name")
         )
+        selected_course = self.get_selected_course(courses, forced_course_id=forced_course_id)
         context["courses"] = courses
+        context["selected_course"] = selected_course
         context["note_form"] = NoteCreateForm()
         context["note_edit_form"] = NoteEditForm()
 
@@ -101,10 +121,38 @@ class HomeView(LoginRequiredMixin, TemplateView):
         context["course_edit_errors"] = kwargs.get("course_edit_errors", False)
         context["textbook_form_errors"] = kwargs.get("textbook_form_errors", False)
         context["textbook_course_id"] = kwargs.get("textbook_course_id")
+
+        if "textbook_edit_form" in kwargs:
+            context["textbook_edit_form"] = kwargs["textbook_edit_form"]
+            context["edit_textbook_id"] = kwargs.get("edit_textbook_id")
+            context["textbook_edit_modal_open"] = True
+        else:
+            tb_edit_get = self.request.GET.get("edit_textbook")
+            textbook_obj = None
+            if tb_edit_get:
+                textbook_obj = Textbook.objects.filter(
+                    pk=tb_edit_get, course__user=self.request.user
+                ).first()
+            if textbook_obj:
+                context["textbook_edit_form"] = EditTextbookForm(
+                    prefix="edit_tb", instance=textbook_obj
+                )
+                context["edit_textbook_id"] = textbook_obj.pk
+                context["textbook_edit_modal_open"] = True
+            else:
+                context["textbook_edit_form"] = EditTextbookForm(prefix="edit_tb")
+                context["edit_textbook_id"] = None
+                context["textbook_edit_modal_open"] = False
+
+        context["textbook_edit_errors"] = kwargs.get("textbook_edit_errors", False)
         return context
 
     def post(self, request, *args, **kwargs):
         form_type = request.POST.get("form_type")
+        selected_course_id = request.POST.get("course_context")
+        redirect_url = self.success_url
+        if selected_course_id:
+            redirect_url = f"{self.success_url}?course={selected_course_id}"
 
         if form_type == "course":
             form = CourseForm(request.POST, prefix="add")
@@ -113,7 +161,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
                 course.user = request.user
                 course.save()
                 messages.success(request, "Course added.")
-                return redirect(self.success_url)
+                return redirect(f"{self.success_url}?course={course.pk}")
             return self.render_to_response(
                 self.get_context_data(course_form=form, course_form_errors=True)
             )
@@ -125,7 +173,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
             if form.is_valid():
                 form.save()
                 messages.success(request, "Course updated.")
-                return redirect(self.success_url)
+                return redirect(f"{self.success_url}?course={course.pk}")
             return self.render_to_response(
                 self.get_context_data(
                     course_edit_form=form,
@@ -137,9 +185,9 @@ class HomeView(LoginRequiredMixin, TemplateView):
         if form_type == "textbook":
             form = TextbookForm(request.POST, user=request.user)
             if form.is_valid():
-                form.save()
+                textbook = form.save()
                 messages.success(request, "Textbook added.")
-                return redirect(self.success_url)
+                return redirect(f"{self.success_url}?course={textbook.course_id}")
             return self.render_to_response(
                 self.get_context_data(
                     textbook_form=form,
@@ -147,6 +195,56 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     textbook_course_id=request.POST.get("course"),
                 )
             )
+
+        if form_type == "edit_textbook":
+            textbook = get_object_or_404(
+                Textbook.objects.select_related("course"),
+                pk=request.POST.get("textbook_id"),
+                course__user=request.user,
+            )
+            form = EditTextbookForm(
+                request.POST, prefix="edit_tb", instance=textbook
+            )
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Textbook updated.")
+                return redirect(f"{self.success_url}?course={textbook.course_id}")
+            return self.render_to_response(
+                self.get_context_data(
+                    textbook_edit_form=form,
+                    edit_textbook_id=textbook.pk,
+                    textbook_edit_errors=True,
+                    force_course_id=textbook.course_id,
+                )
+            )
+
+        if form_type == "delete_textbook":
+            textbook = Textbook.objects.filter(
+                pk=request.POST.get("textbook_id"),
+                course__user=request.user,
+            ).first()
+            course_pk = selected_course_id or (
+                textbook.course_id if textbook else None
+            )
+            if textbook:
+                ct_tb = ContentType.objects.get_for_model(Textbook)
+                oid = textbook.pk
+                uid = request.user.pk
+                Note.objects.filter(user_id=uid, content_type=ct_tb, object_id=oid).delete()
+                Tag.objects.filter(user_id=uid, content_type=ct_tb, object_id=oid).delete()
+                for att in Attachment.objects.filter(
+                    user_id=uid, content_type=ct_tb, object_id=oid
+                ):
+                    if att.file:
+                        att.file.delete(save=False)
+                    att.delete()
+                textbook.delete()
+                messages.success(request, "Textbook removed.")
+            else:
+                messages.error(request, "Unable to remove that textbook.")
+            if course_pk:
+                return redirect(f"{self.success_url}?course={course_pk}")
+            return redirect(self.success_url)
 
         if form_type == "add_note":
             form = NoteCreateForm(request.POST)
@@ -163,7 +261,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     messages.error(request, "Unable to attach note to that item.")
             else:
                 messages.error(request, "Note cannot be empty.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
 
         if form_type == "add_tag":
             form = TagCreateForm(request.POST)
@@ -180,7 +278,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     messages.error(request, "Unable to attach tag to that item.")
             else:
                 messages.error(request, "Tag cannot be empty.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
 
         if form_type == "add_attachment":
             form = AttachmentUploadForm(request.POST, request.FILES)
@@ -197,7 +295,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     messages.error(request, "Unable to upload attachment.")
             else:
                 messages.error(request, "Please choose a file to upload.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
 
         if form_type == "delete_attachment":
             deleted = delete_attachment_for_user(
@@ -208,7 +306,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
                 messages.success(request, "Attachment removed.")
             else:
                 messages.error(request, "Unable to remove attachment.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
 
         if form_type == "delete_tag":
             deleted = delete_tag_for_user(user=request.user, tag_id=request.POST.get("tag_id"))
@@ -216,7 +314,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
                 messages.success(request, "Tag removed.")
             else:
                 messages.error(request, "Unable to remove that tag.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
 
         if form_type == "edit_note":
             form = NoteEditForm(request.POST)
@@ -232,7 +330,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     messages.error(request, "Unable to update that note.")
             else:
                 messages.error(request, "Note update failed.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
 
         if form_type == "delete_note":
             deleted = delete_note_for_user(
@@ -243,6 +341,6 @@ class HomeView(LoginRequiredMixin, TemplateView):
                 messages.success(request, "Note deleted.")
             else:
                 messages.error(request, "Unable to delete that note.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
 
         return redirect(self.success_url)

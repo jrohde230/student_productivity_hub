@@ -28,12 +28,50 @@
         background: #fafbfd;
         padding: 1rem;
     }
+    .assignments-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    @media (max-width: 920px) {
+        .assignments-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    .assignment-nav-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .assignment-nav-list a {
+        display: block;
+        text-decoration: none;
+        color: #1f2937;
+        padding: 0.6rem 0.7rem;
+        border: 1px solid #dce3eb;
+        border-radius: 6px;
+        background: #fff;
+    }
+    .assignment-nav-list a:hover {
+        border-color: #7c3aed;
+        background: #f3e8ff;
+    }
+    .assignment-nav-list a.active {
+        border-color: #7c3aed;
+        background: #ede9fe;
+        font-weight: 600;
+    }
     .list-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 0.75rem;
         flex-wrap: wrap;
+        margin-bottom: 0.6rem;
     }
     .sort-form {
         display: flex;
@@ -73,14 +111,14 @@
         padding: 0.25rem 0.55rem;
         font-size: 0.8rem;
         border-radius: 5px;
-        border: 1px solid #dce3eb;
-        background: #fff;
-        color: #344054;
+        border: 1px solid #6d28d9;
+        background: #7c3aed;
+        color: #fff;
     }
     .btn-inline:hover {
-        background: #f3e8ff;
-        border-color: #7c3aed;
-        color: #4c1d95;
+        background: #6d28d9;
+        border-color: #5b21b6;
+        color: #fff;
     }
     .btn-inline-danger {
         width: auto;
@@ -95,6 +133,17 @@
         background: #ffe4e4;
         border-color: #dc2626;
         color: #7f1d1d;
+        box-shadow: none;
+        filter: none;
+    }
+    .assignment-head-actions .btn-inline-danger:hover:not(:disabled),
+    .checklist-actions .btn-inline-danger:hover:not(:disabled),
+    .attachment-actions .btn-inline-danger:hover:not(:disabled) {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+        box-shadow: none;
+        filter: none;
     }
     .assignment-title {
         font-weight: 600;
@@ -116,14 +165,18 @@
         margin-top: 1rem;
     }
     .notes-block {
-        margin-top: 0.6rem;
-        border-top: 1px solid #eef2f6;
-        padding-top: 0.5rem;
+        margin-top: 0.75rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.55rem 0.6rem;
     }
     .notes-title {
-        margin: 0 0 0.35rem;
+        margin: 0 0 0.45rem;
         font-size: 0.85rem;
-        color: #445;
+        color: #4c1d95;
+        font-weight: 600;
+        letter-spacing: 0.01em;
     }
     .notes-list {
         list-style: none;
@@ -142,6 +195,16 @@
     .note-line { margin-bottom: 0.2rem; }
     .note-actions { display: flex; justify-content: flex-end; gap: 0.3rem; align-items: center; flex-wrap: wrap; }
     .note-actions button { width: auto; padding: 0.2rem 0.45rem; font-size: 0.76rem; }
+    .note-actions form button[type="submit"] {
+        background: #fff5f5;
+        border: 1px solid #f0b4b4;
+        color: #8a1f1f;
+    }
+    .note-actions form button[type="submit"]:hover {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+    }
     .note-edit-form { display: none; margin-top: 0.3rem; }
     .note-edit-form.open { display: block; }
     .note-add-toggle {
@@ -181,14 +244,18 @@
         padding-top: 0.45rem;
     }
     .checklist-block {
-        margin-top: 0.55rem;
-        border-top: 1px solid #eef2f6;
-        padding-top: 0.45rem;
+        margin-top: 0.75rem;
+        border: 1px solid #c7d2fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.55rem 0.6rem;
     }
     .checklist-title {
-        margin: 0 0 0.35rem;
+        margin: 0 0 0.45rem;
         font-size: 0.85rem;
-        color: #445;
+        color: #4c1d95;
+        font-weight: 600;
+        letter-spacing: 0.01em;
     }
     .checklist-list {
         list-style: none;
@@ -240,14 +307,18 @@
         font-size: 0.78rem;
     }
     .attachments-block {
-        margin-top: 0.55rem;
-        border-top: 1px solid #eef2f6;
-        padding-top: 0.45rem;
+        margin-top: 0.75rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.55rem 0.6rem;
     }
     .attachments-title {
-        margin: 0 0 0.35rem;
+        margin: 0 0 0.45rem;
         font-size: 0.85rem;
-        color: #445;
+        color: #4c1d95;
+        font-weight: 600;
+        letter-spacing: 0.01em;
     }
     .attachments-list {
         list-style: none;
@@ -396,181 +467,204 @@
         <button type="button" id="open-assignment-modal" class="action-btn">Add assignment</button>
     </div>
 
-    <section class="panel">
-        <div class="list-header">
-            <h2>Assignment list</h2>
-            <form method="get" class="sort-form">
-                <label for="sort">Sort by</label>
-                <select id="sort" name="sort" onchange="this.form.submit()">
-                    <option value="due_asc" {% if selected_sort == "due_asc" %}selected{% endif %}>Due date (soonest first)</option>
-                    <option value="due_desc" {% if selected_sort == "due_desc" %}selected{% endif %}>Due date (latest first)</option>
-                    <option value="class_asc" {% if selected_sort == "class_asc" %}selected{% endif %}>Class name (A-Z)</option>
-                    <option value="subject_asc" {% if selected_sort == "subject_asc" %}selected{% endif %}>Subject (A-Z)</option>
-                    <option value="name_asc" {% if selected_sort == "name_asc" %}selected{% endif %}>Assignment name (A-Z)</option>
-                </select>
-            </form>
-        </div>
+    <div class="assignments-layout">
+        <section class="panel">
+            <div class="list-header">
+                <h2>Assignment list</h2>
+                <form method="get" class="sort-form">
+                    <label for="sort">Sort by</label>
+                    <select id="sort" name="sort" onchange="this.form.submit()">
+                        <option value="due_asc" {% if selected_sort == "due_asc" %}selected{% endif %}>Due date (soonest first)</option>
+                        <option value="due_desc" {% if selected_sort == "due_desc" %}selected{% endif %}>Due date (latest first)</option>
+                        <option value="class_asc" {% if selected_sort == "class_asc" %}selected{% endif %}>Class name (A-Z)</option>
+                        <option value="subject_asc" {% if selected_sort == "subject_asc" %}selected{% endif %}>Subject (A-Z)</option>
+                        <option value="name_asc" {% if selected_sort == "name_asc" %}selected{% endif %}>Assignment name (A-Z)</option>
+                    </select>
+                </form>
+            </div>
+            {% if assignments %}
+                <ul class="assignment-nav-list">
+                    {% for assignment in assignments %}
+                        <li>
+                            <a href="{% url 'assignments:home' %}?sort={{ selected_sort }}&assignment={{ assignment.pk }}"{% if selected_assignment and selected_assignment.pk == assignment.pk %} class="active"{% endif %}>
+                                {{ assignment.assignment_name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-note">No assignments yet. Click "Add assignment" to create your first one.</p>
+            {% endif %}
+        </section>
 
-        {% if assignments %}
-            <ul class="assignment-list">
-                {% for assignment in assignments %}
-                    <li class="assignment-item">
-                        <div class="assignment-top">
-                            {% if assignment.assignment_url %}
-                                <a class="assignment-title assignment-title-link" href="{{ assignment.assignment_url }}" target="_blank" rel="noopener noreferrer">{{ assignment.assignment_name }}</a>
-                            {% else %}
-                                <span class="assignment-title">{{ assignment.assignment_name }}</span>
-                            {% endif %}
-                            <div class="assignment-head-actions">
-                                <span>{{ assignment.due_date }}</span>
-                                <button
-                                    type="button"
-                                    class="btn-inline open-edit-assignment-modal"
-                                    data-assignment-id="{{ assignment.pk }}"
-                                    data-assignment-name="{{ assignment.assignment_name }}"
-                                    data-class-name="{{ assignment.class_name }}"
-                                    data-subject="{{ assignment.subject }}"
-                                    data-due-date="{{ assignment.due_date|date:'Y-m-d' }}"
-                                    data-assignment-url="{{ assignment.assignment_url }}"
-                                >
-                                    Edit
-                                </button>
-                                <form method="post" onsubmit="return confirm('Delete this assignment?');">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="form_type" value="delete_assignment">
-                                    <input type="hidden" name="assignment_id" value="{{ assignment.pk }}">
-                                    <button type="submit" class="btn-inline-danger">Delete</button>
-                                </form>
-                            </div>
+        <section class="panel">
+            {% if selected_assignment %}
+                <div class="assignment-item">
+                    <div class="assignment-top">
+                        {% if selected_assignment.assignment_url %}
+                            <a class="assignment-title assignment-title-link" href="{{ selected_assignment.assignment_url }}" target="_blank" rel="noopener noreferrer">{{ selected_assignment.assignment_name }}</a>
+                        {% else %}
+                            <span class="assignment-title">{{ selected_assignment.assignment_name }}</span>
+                        {% endif %}
+                        <div class="assignment-head-actions">
+                            <span>{{ selected_assignment.due_date }}</span>
+                            <button
+                                type="button"
+                                class="btn-inline open-edit-assignment-modal"
+                                data-assignment-id="{{ selected_assignment.pk }}"
+                                data-assignment-name="{{ selected_assignment.assignment_name }}"
+                                data-class-name="{{ selected_assignment.class_name }}"
+                                data-subject="{{ selected_assignment.subject }}"
+                                data-due-date="{{ selected_assignment.due_date|date:'Y-m-d' }}"
+                                data-assignment-url="{{ selected_assignment.assignment_url }}"
+                            >
+                                Edit
+                            </button>
+                            <form method="post" onsubmit="return confirm('Delete this assignment?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="delete_assignment">
+                                <input type="hidden" name="assignment_id" value="{{ selected_assignment.pk }}">
+                                <button type="submit" class="btn-inline-danger">Delete</button>
+                            </form>
                         </div>
-                        <div class="meta">
-                            Class: {{ assignment.class_name }} | Subject: {{ assignment.subject }}
-                        </div>
-                        <div class="notes-block">
-                            <p class="notes-title">Notes</p>
-                            {% if assignment.notes_list %}
-                                <ul class="notes-list">
-                                    {% for note in assignment.notes_list %}
-                                        <li>
-                                            <div class="note-line">{{ note.body }}</div>
-                                            <div class="note-actions">
-                                                <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
-                                                <form method="post">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="form_type" value="delete_note">
-                                                    <input type="hidden" name="note_id" value="{{ note.pk }}">
-                                                    <button type="submit">Delete</button>
-                                                </form>
-                                            </div>
-                                            <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
+                    </div>
+                    <div class="meta">
+                        Class: {{ selected_assignment.class_name }} | Subject: {{ selected_assignment.subject }}
+                    </div>
+                    <div class="notes-block">
+                        <p class="notes-title">Notes</p>
+                        {% if selected_assignment.notes_list %}
+                            <ul class="notes-list">
+                                {% for note in selected_assignment.notes_list %}
+                                    <li>
+                                        <div class="note-line">{{ note.body }}</div>
+                                        <div class="note-actions">
+                                            <button type="button" class="note-edit-toggle" data-target="note-edit-{{ note.pk }}">Edit</button>
+                                            <form method="post">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="form_type" value="edit_note">
+                                                <input type="hidden" name="form_type" value="delete_note">
                                                 <input type="hidden" name="note_id" value="{{ note.pk }}">
-                                                <textarea name="body">{{ note.body }}</textarea>
-                                                <button type="submit">Update note</button>
+                                                <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                                                <button type="submit">Delete</button>
                                             </form>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-assignment-{{ assignment.pk }}">Add note</button>
-                            <form method="post" class="note-form note-add-form" id="note-add-assignment-{{ assignment.pk }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="form_type" value="add_note">
-                                <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
-                                <input type="hidden" name="object_id" value="{{ assignment.pk }}">
-                                <textarea name="body" placeholder="Add a note for this assignment"></textarea>
-                                <button type="submit">Save note</button>
-                            </form>
-                        </div>
-                        <div class="tags-block">
-                            {% if assignment.tags_list %}
-                                <ul class="tag-list">
-                                    {% for tag in assignment.tags_list %}
-                                        <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-assignment-{{ assignment.pk }}">Add tag</button>
-                            <form method="post" class="tag-add-form" id="tag-add-assignment-{{ assignment.pk }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="form_type" value="add_tag">
-                                <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
-                                <input type="hidden" name="object_id" value="{{ assignment.pk }}">
-                                <input type="text" name="label" placeholder="#math">
-                                <button type="submit">Save tag</button>
-                            </form>
-                        </div>
-                        <div class="checklist-block">
-                            <p class="checklist-title">Checklist</p>
-                            {% if assignment.checklist_items %}
-                                <ul class="checklist-list">
-                                    {% for item in assignment.checklist_items %}
-                                        <li class="checklist-item{% if item.is_done %} done{% endif %}">
-                                            <span class="item-text">{{ item.text }}</span>
-                                            <div class="checklist-actions">
-                                                <form method="post">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="form_type" value="toggle_checklist_item">
-                                                    <input type="hidden" name="item_id" value="{{ item.pk }}">
-                                                    <input type="hidden" name="is_done" value="{% if item.is_done %}0{% else %}1{% endif %}">
-                                                    <button type="submit">{% if item.is_done %}Undo{% else %}Done{% endif %}</button>
-                                                </form>
-                                                <form method="post">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="form_type" value="delete_checklist_item">
-                                                    <input type="hidden" name="item_id" value="{{ item.pk }}">
-                                                    <button type="submit" class="btn-inline-danger">Delete</button>
-                                                </form>
-                                            </div>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="checklist-add-assignment-{{ assignment.pk }}">Add subtask</button>
-                            <form method="post" class="checklist-add-form" id="checklist-add-assignment-{{ assignment.pk }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="form_type" value="add_checklist_item">
-                                <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
-                                <input type="hidden" name="object_id" value="{{ assignment.pk }}">
-                                <input type="text" name="text" placeholder="e.g. Draft outline">
-                                <button type="submit">Save subtask</button>
-                            </form>
-                        </div>
-                        <div class="attachments-block">
-                            <p class="attachments-title">Attachments</p>
-                            {% if assignment.attachments_list %}
-                                <ul class="attachments-list">
-                                    {% for attachment in assignment.attachments_list %}
-                                        <li>
-                                            <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
-                                            <form method="post" class="attachment-actions">
+                                        </div>
+                                        <form method="post" class="note-form note-edit-form" id="note-edit-{{ note.pk }}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="edit_note">
+                                            <input type="hidden" name="note_id" value="{{ note.pk }}">
+                                            <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                                            <textarea name="body">{{ note.body }}</textarea>
+                                            <button type="submit">Update note</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="note-add-assignment-{{ selected_assignment.pk }}">Add note</button>
+                        <form method="post" class="note-form note-add-form" id="note-add-assignment-{{ selected_assignment.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="add_note">
+                            <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
+                            <input type="hidden" name="object_id" value="{{ selected_assignment.pk }}">
+                            <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                            <textarea name="body" placeholder="Add a note for this assignment"></textarea>
+                            <button type="submit">Save note</button>
+                        </form>
+                    </div>
+                    <div class="checklist-block">
+                        <p class="checklist-title">Checklist</p>
+                        {% if selected_assignment.checklist_items %}
+                            <ul class="checklist-list">
+                                {% for item in selected_assignment.checklist_items %}
+                                    <li class="checklist-item{% if item.is_done %} done{% endif %}">
+                                        <span class="item-text">{{ item.text }}</span>
+                                        <div class="checklist-actions">
+                                            <form method="post">
                                                 {% csrf_token %}
-                                                <input type="hidden" name="form_type" value="delete_attachment">
-                                                <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
-                                                <button type="submit" class="btn-inline-danger">Remove</button>
+                                                <input type="hidden" name="form_type" value="toggle_checklist_item">
+                                                <input type="hidden" name="item_id" value="{{ item.pk }}">
+                                                <input type="hidden" name="is_done" value="{% if item.is_done %}0{% else %}1{% endif %}">
+                                                <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                                                <button type="submit">{% if item.is_done %}Undo{% else %}Done{% endif %}</button>
                                             </form>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-assignment-{{ assignment.pk }}">Add attachment</button>
-                            <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-assignment-{{ assignment.pk }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="form_type" value="add_attachment">
-                                <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
-                                <input type="hidden" name="object_id" value="{{ assignment.pk }}">
-                                <input type="file" name="file">
-                                <button type="submit">Upload file</button>
-                            </form>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="empty-note">No assignments yet. Click "Add assignment" to create your first one.</p>
-        {% endif %}
-    </section>
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="form_type" value="delete_checklist_item">
+                                                <input type="hidden" name="item_id" value="{{ item.pk }}">
+                                                <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                                                <button type="submit" class="btn-inline-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="checklist-add-assignment-{{ selected_assignment.pk }}">Add subtask</button>
+                        <form method="post" class="checklist-add-form" id="checklist-add-assignment-{{ selected_assignment.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="add_checklist_item">
+                            <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
+                            <input type="hidden" name="object_id" value="{{ selected_assignment.pk }}">
+                            <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                            <input type="text" name="text" placeholder="e.g. Draft outline">
+                            <button type="submit">Save subtask</button>
+                        </form>
+                    </div>
+                    <div class="attachments-block">
+                        <p class="attachments-title">Attachments</p>
+                        {% if selected_assignment.attachments_list %}
+                            <ul class="attachments-list">
+                                {% for attachment in selected_assignment.attachments_list %}
+                                    <li>
+                                        <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
+                                        <form method="post" class="attachment-actions">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_attachment">
+                                            <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
+                                            <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                                            <button type="submit" class="btn-inline-danger">Remove</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-assignment-{{ selected_assignment.pk }}">Add attachment</button>
+                        <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-assignment-{{ selected_assignment.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="add_attachment">
+                            <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
+                            <input type="hidden" name="object_id" value="{{ selected_assignment.pk }}">
+                            <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                            <input type="file" name="file">
+                            <button type="submit">Upload file</button>
+                        </form>
+                    </div>
+                    <div class="tags-block">
+                        {% if selected_assignment.tags_list %}
+                            <ul class="tag-list">
+                                {% for tag in selected_assignment.tags_list %}
+                                    <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-assignment-{{ selected_assignment.pk }}">Add tag</button>
+                        <form method="post" class="tag-add-form" id="tag-add-assignment-{{ selected_assignment.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="add_tag">
+                            <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
+                            <input type="hidden" name="object_id" value="{{ selected_assignment.pk }}">
+                            <input type="hidden" name="assignment_context" value="{{ selected_assignment.pk }}">
+                            <input type="text" name="label" placeholder="#math">
+                            <button type="submit">Save tag</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <h2>No assignment selected</h2>
+                <p class="empty-note">Create an assignment to view details and related content here.</p>
+            {% endif %}
+        </section>
+    </div>
 
     <div class="modal-overlay{% if form.errors %} open{% endif %}" id="assignment-modal-overlay">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-assignment-title">

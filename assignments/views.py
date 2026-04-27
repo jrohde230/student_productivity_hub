@@ -59,6 +59,15 @@ class HomeView(LoginRequiredMixin, FormView):
             return "due_asc"
         return sort
 
+    def get_selected_assignment(self, assignments):
+        assignment_id = self.request.GET.get("assignment")
+        selected = None
+        if assignment_id:
+            selected = next((a for a in assignments if str(a.pk) == str(assignment_id)), None)
+        if not selected and assignments:
+            selected = assignments[0]
+        return selected
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         sort_key = self.get_sort_key()
@@ -73,9 +82,11 @@ class HomeView(LoginRequiredMixin, FormView):
             assignment.tags_list = tags_for_target(grouped_tags, assignment)
             assignment.checklist_items = items_for_target(grouped_items, assignment)
             assignment.attachments_list = attachments_for_target(grouped_attachments, assignment)
+        selected_assignment = self.get_selected_assignment(assignments)
 
         context["selected_sort"] = sort_key
         context["assignments"] = assignments
+        context["selected_assignment"] = selected_assignment
         context["ct_assignment_id"] = ct_map[Assignment].id
         context["note_form"] = NoteCreateForm()
         context["note_edit_form"] = NoteEditForm()
@@ -94,15 +105,20 @@ class HomeView(LoginRequiredMixin, FormView):
         assignment.user = self.request.user
         assignment.save()
         messages.success(self.request, "Assignment added.")
-        return super().form_valid(form)
+        return redirect(f"{self.success_url}?assignment={assignment.pk}")
 
     def post(self, request, *args, **kwargs):
+        selected_assignment_id = request.POST.get("assignment_context")
+        redirect_url = self.success_url
+        if selected_assignment_id:
+            redirect_url = f"{self.success_url}?assignment={selected_assignment_id}"
+
         if request.POST.get("form_type") == "edit_assignment":
             form = EditAssignmentForm(request.POST, prefix="editassign", user=request.user)
             if form.is_valid():
-                form.save()
+                assignment = form.save()
                 messages.success(request, "Assignment updated.")
-                return redirect(self.success_url)
+                return redirect(f"{self.success_url}?assignment={assignment.pk}")
             messages.error(request, "Unable to update assignment.")
             return self.render_to_response(
                 self.get_context_data(
@@ -117,6 +133,8 @@ class HomeView(LoginRequiredMixin, FormView):
                 user=request.user,
             ).first()
             if assignment:
+                if str(assignment.pk) == str(selected_assignment_id):
+                    selected_assignment_id = None
                 assignment.delete()
                 messages.success(request, "Assignment deleted.")
             else:
@@ -138,7 +156,7 @@ class HomeView(LoginRequiredMixin, FormView):
                     messages.error(request, "Unable to attach note to that item.")
             else:
                 messages.error(request, "Note cannot be empty.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "add_checklist_item":
             form = ChecklistItemCreateForm(request.POST)
             if form.is_valid():
@@ -154,7 +172,7 @@ class HomeView(LoginRequiredMixin, FormView):
                     messages.error(request, "Unable to add checklist item.")
             else:
                 messages.error(request, "Checklist item cannot be empty.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "add_attachment":
             form = AttachmentUploadForm(request.POST, request.FILES)
             if form.is_valid():
@@ -180,7 +198,7 @@ class HomeView(LoginRequiredMixin, FormView):
                 messages.success(request, "Attachment removed.")
             else:
                 messages.error(request, "Unable to remove attachment.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "toggle_checklist_item":
             item = set_item_done_for_user(
                 user=request.user,
@@ -189,14 +207,14 @@ class HomeView(LoginRequiredMixin, FormView):
             )
             if not item:
                 messages.error(request, "Unable to update checklist item.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "delete_checklist_item":
             deleted = delete_item_for_user(user=request.user, item_id=request.POST.get("item_id"))
             if deleted:
                 messages.success(request, "Checklist item removed.")
             else:
                 messages.error(request, "Unable to remove checklist item.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "edit_note":
             form = NoteEditForm(request.POST)
             if form.is_valid():
@@ -211,7 +229,7 @@ class HomeView(LoginRequiredMixin, FormView):
                     messages.error(request, "Unable to update that note.")
             else:
                 messages.error(request, "Note update failed.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "delete_note":
             deleted = delete_note_for_user(
                 user=request.user,
@@ -221,7 +239,7 @@ class HomeView(LoginRequiredMixin, FormView):
                 messages.success(request, "Note deleted.")
             else:
                 messages.error(request, "Unable to delete that note.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "add_tag":
             form = TagCreateForm(request.POST)
             if form.is_valid():
@@ -237,12 +255,12 @@ class HomeView(LoginRequiredMixin, FormView):
                     messages.error(request, "Unable to attach tag to that item.")
             else:
                 messages.error(request, "Tag cannot be empty.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         if request.POST.get("form_type") == "delete_tag":
             deleted = delete_tag_for_user(user=request.user, tag_id=request.POST.get("tag_id"))
             if deleted:
                 messages.success(request, "Tag removed.")
             else:
                 messages.error(request, "Unable to remove that tag.")
-            return redirect(self.success_url)
+            return redirect(redirect_url)
         return super().post(request, *args, **kwargs)

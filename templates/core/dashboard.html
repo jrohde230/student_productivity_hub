@@ -226,15 +226,18 @@
         {% if user.email %}
             <span class="user-label">{{ user.email }}</span>
         {% endif %}
-        <a class="btn-link" href="{% url 'logout' %}">Log out</a>
+        <form method="post" action="{% url 'logout' %}" style="display: inline; margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="btn-link">Log out</button>
+        </form>
     </div>
 </div>
 
 <div class="dashboard-layout">
     <aside class="card-grid">
         <a class="card" href="{% url 'courses:home' %}">
-            <h2>Courses &amp; environments</h2>
-            <p>Link textbooks, LMS links, and class spaces.</p>
+            <h2>Courses</h2>
+            <p>Link your courses and their associated textbooks.</p>
         </a>
         <a class="card" href="{% url 'assignments:home' %}">
             <h2>Assignments</h2>

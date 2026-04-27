@@ -43,15 +43,19 @@
         font-size: 0.92rem;
     }
     .username-change-form .errors,
-    .username-change-form ul.errorlist {
+    .username-change-form ul.errorlist,
+    .password-change-form .errors,
+    .password-change-form ul.errorlist {
         color: #a30000;
         margin: 0 0 0.75rem;
         padding-left: 1.1rem;
     }
-    .username-change-form p {
+    .username-change-form p,
+    .password-change-form p {
         margin-bottom: 0.65rem;
     }
-    .username-change-form button[type="submit"] {
+    .username-change-form button[type="submit"],
+    .password-change-form button[type="submit"] {
         width: auto;
         margin-top: 0.25rem;
         padding: 0.45rem 0.9rem;
@@ -103,11 +107,12 @@
     </ul>
 
     <section class="profile-section">
-        <button type="button" class="username-change-toggle" data-target="username-change-panel" id="username-change-toggle">Change username</button>
+        <button type="button" class="username-change-toggle profile-panel-toggle" data-target="username-change-panel" id="username-change-toggle">Change username</button>
         <div id="username-change-panel" class="username-change-panel{% if username_form.errors %} open{% endif %}">
             <p>Pick a new username. It must be unique and is used when you sign in with your email and password.</p>
             <form method="post" class="username-change-form">
                 {% csrf_token %}
+                <input type="hidden" name="form_type" value="username">
                 {% if username_form.non_field_errors %}
                     <div class="errors">{{ username_form.non_field_errors }}</div>
                 {% endif %}
@@ -123,17 +128,41 @@
         </div>
     </section>
 
+    <section class="profile-section">
+        <button type="button" class="username-change-toggle profile-panel-toggle" data-target="password-change-panel" id="password-change-toggle">Change password</button>
+        <div id="password-change-panel" class="username-change-panel{% if password_form.errors %} open{% endif %}">
+            <p>Enter your current password, then choose a new one. You will stay signed in after a successful change.</p>
+            <form method="post" class="password-change-form">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="password">
+                {% if password_form.non_field_errors %}
+                    <div class="errors">{{ password_form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in password_form %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                <button type="submit">Update password</button>
+            </form>
+        </div>
+    </section>
+
     <script>
         (function () {
-            var toggle = document.getElementById("username-change-toggle");
-            var panel = document.getElementById("username-change-panel");
-            if (!toggle || !panel) return;
-            toggle.addEventListener("click", function () {
-                panel.classList.toggle("open");
-                if (panel.classList.contains("open")) {
-                    var input = panel.querySelector("input[name='username']");
-                    if (input) input.focus();
-                }
+            document.querySelectorAll(".profile-panel-toggle").forEach(function (toggle) {
+                toggle.addEventListener("click", function () {
+                    var panel = document.getElementById(toggle.getAttribute("data-target"));
+                    if (!panel) return;
+                    panel.classList.toggle("open");
+                    if (panel.classList.contains("open")) {
+                        var input = panel.querySelector("input:not([type='hidden'])");
+                        if (input) input.focus();
+                    }
+                });
             });
         })();
     </script>

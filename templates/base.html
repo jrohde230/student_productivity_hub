@@ -288,6 +288,31 @@
         .btn-link:hover {
             background: #f3e8ff;
         }
+        button.btn-link {
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin: 0;
+            width: auto;
+            display: inline-block;
+            background: transparent;
+            color: #7c3aed;
+            border: 1px solid #7c3aed;
+        }
+        button.btn-link:hover:not(:disabled) {
+            background: #f3e8ff;
+            color: #7c3aed;
+            border-color: #7c3aed;
+            box-shadow: none;
+            filter: none;
+        }
+        form.nav-logout-form {
+            display: inline;
+            margin: 0;
+        }
+        form.nav-logout-form .nav-link-btn {
+            width: auto;
+        }
     </style>
 </head>
 <body>
@@ -312,7 +337,12 @@
                 </li>
                 <li><a href="{% url 'profile' %}">Profile</a></li>
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" class="nav-logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link-btn">Logout</button>
+                        </form>
+                    </li>
                 {% endif %}
             </ul>
         </div>

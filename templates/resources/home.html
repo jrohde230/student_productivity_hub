@@ -30,7 +30,7 @@
         }
     }
     .resource-column {
-        border: 1px solid #dce3eb;
+        border: 1px solid #ddd6fe;
         border-radius: 8px;
         background: #fafbfd;
         padding: 0.85rem 1rem 1rem;
@@ -46,13 +46,15 @@
         gap: 0.5rem;
         margin-bottom: 0.65rem;
         padding-bottom: 0.65rem;
-        border-bottom: 1px solid #e5eaf0;
+        border-bottom: 1px solid #ddd6fe;
     }
     .column-head h2 {
         margin: 0;
         font-size: 1.05rem;
         line-height: 1.3;
         word-break: break-word;
+        color: #4c1d95;
+        font-weight: 600;
     }
     .column-actions {
         display: flex;
@@ -98,8 +100,8 @@
     }
     .resource-row {
         background: #fff;
-        border: 1px solid #e5eaf0;
-        border-radius: 6px;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
         padding: 0.45rem 0.5rem;
         font-size: 0.92rem;
         display: grid;
@@ -175,24 +177,39 @@
         background: #ffe4e4;
         border-color: #dc2626;
         color: #7f1d1d;
-        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
-        filter: brightness(1.02);
+    }
+    .inline-delete-form .btn-delete:hover:not(:disabled),
+    .attachment-actions .btn-delete:hover:not(:disabled),
+    .resource-row .note-actions form button[type="submit"]:hover:not(:disabled) {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+        box-shadow: none;
+        filter: none;
     }
     .inline-delete-form {
         display: inline;
         margin: 0;
     }
-    .notes-block {
-        margin-top: 0.35rem;
-        border-top: 1px solid #eef2f6;
-        padding-top: 0.35rem;
+    .section-title {
+        margin: 0 0 0.35rem;
+        font-size: 0.82rem;
+        color: #4c1d95;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+    .resource-row .detail-card {
+        margin-top: 0.45rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.45rem 0.5rem;
         grid-column: 1 / -1;
         width: 100%;
+        box-sizing: border-box;
     }
-    .notes-title {
-        margin: 0 0 0.25rem;
-        font-size: 0.8rem;
-        color: #4b5563;
+    .notes-block {
+        margin-top: 0;
     }
     .notes-list {
         list-style: none;
@@ -228,6 +245,16 @@
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
     }
+    .note-actions form button[type="submit"] {
+        background: #fff5f5;
+        border: 1px solid #f0b4b4;
+        color: #8a1f1f;
+    }
+    .note-actions form button[type="submit"]:hover {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+    }
     .note-form button:hover {
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
@@ -247,12 +274,16 @@
     }
     .note-add-form { display: none; margin-top: 0.25rem; }
     .note-add-form.open { display: block; }
-    .tags-block {
-        margin-top: 0.3rem;
+    .tags-block-plain {
+        margin-top: 0.45rem;
         border-top: 1px solid #eef2f6;
-        padding-top: 0.3rem;
+        padding-top: 0.35rem;
         grid-column: 1 / -1;
         width: 100%;
+        box-sizing: border-box;
+    }
+    .tags-block-plain .tag-add-form {
+        margin-top: 0.25rem;
     }
     .tag-list {
         list-style: none;
@@ -298,11 +329,7 @@
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
     }
     .attachments-block {
-        margin-top: 0.3rem;
-        border-top: 1px solid #eef2f6;
-        padding-top: 0.3rem;
-        grid-column: 1 / -1;
-        width: 100%;
+        margin-top: 0;
     }
     .attachments-list {
         list-style: none;
@@ -445,8 +472,8 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="notes-block">
-                                    <p class="notes-title">Notes</p>
+                                <div class="notes-block detail-card">
+                                    <p class="section-title">Notes</p>
                                     {% if item.notes_list %}
                                         <ul class="notes-list">
                                             {% for note in item.notes_list %}
@@ -482,25 +509,8 @@
                                         <button type="submit">Save note</button>
                                     </form>
                                 </div>
-                                <div class="tags-block">
-                                    {% if item.tags_list %}
-                                        <ul class="tag-list">
-                                            {% for tag in item.tags_list %}
-                                                <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% endif %}
-                                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-resource-{{ item.pk }}">Add tag</button>
-                                    <form method="post" class="tag-add-form" id="tag-add-resource-{{ item.pk }}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="form_type" value="add_tag">
-                                        <input type="hidden" name="content_type_id" value="{{ ct_resource_item_id }}">
-                                        <input type="hidden" name="object_id" value="{{ item.pk }}">
-                                        <input type="text" name="label" placeholder="#math">
-                                        <button type="submit">Save tag</button>
-                                    </form>
-                                </div>
-                                <div class="attachments-block">
+                                <div class="attachments-block detail-card">
+                                    <p class="section-title">Attachments</p>
                                     {% if item.attachments_list %}
                                         <ul class="attachments-list">
                                             {% for attachment in item.attachments_list %}
@@ -524,6 +534,24 @@
                                         <input type="hidden" name="object_id" value="{{ item.pk }}">
                                         <input type="file" name="file">
                                         <button type="submit">Upload file</button>
+                                    </form>
+                                </div>
+                                <div class="tags-block-plain">
+                                    {% if item.tags_list %}
+                                        <ul class="tag-list">
+                                            {% for tag in item.tags_list %}
+                                                <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-resource-{{ item.pk }}">Add tag</button>
+                                    <form method="post" class="tag-add-form" id="tag-add-resource-{{ item.pk }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_type" value="add_tag">
+                                        <input type="hidden" name="content_type_id" value="{{ ct_resource_item_id }}">
+                                        <input type="hidden" name="object_id" value="{{ item.pk }}">
+                                        <input type="text" name="label" placeholder="#math">
+                                        <button type="submit">Save tag</button>
                                     </form>
                                 </div>
                             </li>

@@ -91,8 +91,11 @@
         justify-content: space-between;
         align-items: center;
         gap: 0.75rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.45rem;
         flex-wrap: wrap;
+    }
+    .link-header .section-title {
+        margin-bottom: 0;
     }
     .link-list {
         list-style: none;
@@ -155,8 +158,18 @@
         background: #ffe4e4;
         border-color: #dc2626;
         color: #7f1d1d;
-        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
-        filter: brightness(1.02);
+    }
+    .details-actions .btn-inline-danger:hover:not(:disabled),
+    .link-item-top .btn-inline-danger:hover:not(:disabled),
+    .project-details .checklist-actions .btn-inline-danger:hover:not(:disabled),
+    .project-details .attachment-actions .btn-inline-danger:hover:not(:disabled),
+    .project-details .collab-list .btn-inline-danger:hover:not(:disabled),
+    .project-details .note-actions form button[type="submit"]:hover:not(:disabled) {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+        box-shadow: none;
+        filter: none;
     }
     .inline-form {
         display: inline;
@@ -166,14 +179,22 @@
         color: #5a6570;
         margin-top: 0.5rem;
     }
-    .notes-block {
-        margin-top: 0.8rem;
-        border-top: 1px solid #e5eaf0;
-        padding-top: 0.6rem;
+    .section-title {
+        margin: 0 0 0.45rem;
+        font-size: 0.85rem;
+        color: #4c1d95;
+        font-weight: 600;
+        letter-spacing: 0.01em;
     }
-    .notes-block h3 {
-        margin: 0 0 0.35rem;
-        font-size: 0.92rem;
+    .project-details .detail-card {
+        margin-top: 0.75rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 8px;
+        background: #faf7ff;
+        padding: 0.55rem 0.6rem;
+    }
+    .notes-block {
+        margin-top: 0;
     }
     .notes-list {
         list-style: none;
@@ -208,6 +229,16 @@
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
     }
+    .note-actions form button[type="submit"] {
+        background: #fff5f5;
+        border: 1px solid #f0b4b4;
+        color: #8a1f1f;
+    }
+    .note-actions form button[type="submit"]:hover {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+    }
     .note-form button:hover {
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
@@ -225,20 +256,16 @@
     }
     .note-add-form { display: none; margin-top: 0.35rem; }
     .note-add-form.open { display: block; }
-    .tags-block {
-        margin-top: 0.7rem;
-        border-top: 1px solid #e5eaf0;
-        padding-top: 0.5rem;
+    .tags-block-plain {
+        margin-top: 0.75rem;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.45rem;
+    }
+    .tags-block-plain .tag-add-form {
+        margin-top: 0.25rem;
     }
     .checklist-block {
-        margin-top: 0.75rem;
-        border-top: 1px solid #e5eaf0;
-        padding-top: 0.5rem;
-    }
-    .checklist-title {
-        margin: 0 0 0.35rem;
-        font-size: 0.92rem;
-        color: #445;
+        margin-top: 0;
     }
     .checklist-list {
         list-style: none;
@@ -290,14 +317,10 @@
         font-size: 0.78rem;
     }
     .attachments-block {
-        margin-top: 0.75rem;
-        border-top: 1px solid #e5eaf0;
-        padding-top: 0.5rem;
+        margin-top: 0;
     }
     .collab-block {
-        margin-top: 0.75rem;
-        border-top: 1px solid #e5eaf0;
-        padding-top: 0.5rem;
+        margin-top: 0;
     }
     .collab-list {
         list-style: none;
@@ -318,9 +341,10 @@
         gap: 0.35rem;
     }
     .comment-block {
-        margin-top: 0.75rem;
-        border-top: 1px solid #e5eaf0;
-        padding-top: 0.5rem;
+        margin-top: 0;
+    }
+    .links-section {
+        margin-top: 0;
     }
     .comment-list {
         list-style: none;
@@ -340,11 +364,6 @@
         font-size: 0.72rem;
         color: #6b7280;
         margin-top: 0.18rem;
-    }
-    .attachments-title {
-        margin: 0 0 0.35rem;
-        font-size: 0.92rem;
-        color: #445;
     }
     .attachments-list {
         list-style: none;
@@ -528,8 +547,8 @@
                 {% else %}
                     <p class="project-description">No project description yet.</p>
                 {% endif %}
-                <div class="notes-block">
-                    <h3>Notes</h3>
+                <div class="notes-block detail-card">
+                    <h3 class="section-title">Notes</h3>
                     {% if selected_project.notes_list %}
                         <ul class="notes-list">
                             {% for note in selected_project.notes_list %}
@@ -568,27 +587,8 @@
                         <button type="submit">Save note</button>
                     </form>
                 </div>
-                <div class="tags-block">
-                    {% if selected_project.tags_list %}
-                        <ul class="tag-list">
-                            {% for tag in selected_project.tags_list %}
-                                <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><input type="hidden" name="project_context" value="{{ selected_project.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-project-{{ selected_project.pk }}">Add tag</button>
-                    <form method="post" class="tag-add-form" id="tag-add-project-{{ selected_project.pk }}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="add_tag">
-                        <input type="hidden" name="content_type_id" value="{{ ct_project_id }}">
-                        <input type="hidden" name="object_id" value="{{ selected_project.pk }}">
-                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
-                        <input type="text" name="label" placeholder="#math">
-                        <button type="submit">Save tag</button>
-                    </form>
-                </div>
-                <div class="checklist-block">
-                    <h3 class="checklist-title">Checklist</h3>
+                <div class="checklist-block detail-card">
+                    <h3 class="section-title">Checklist</h3>
                     {% if selected_project.checklist_items %}
                         <ul class="checklist-list">
                             {% for item in selected_project.checklist_items %}
@@ -626,8 +626,8 @@
                         <button type="submit">Save subtask</button>
                     </form>
                 </div>
-                <div class="attachments-block">
-                    <h3 class="attachments-title">Attachments</h3>
+                <div class="attachments-block detail-card">
+                    <h3 class="section-title">Attachments</h3>
                     {% if selected_project.attachments_list %}
                         <ul class="attachments-list">
                             {% for attachment in selected_project.attachments_list %}
@@ -655,8 +655,8 @@
                         <button type="submit">Upload file</button>
                     </form>
                 </div>
-                <div class="collab-block">
-                    <h3 class="attachments-title">Collaborators</h3>
+                <div class="collab-block detail-card">
+                    <h3 class="section-title">Collaborators</h3>
                     <ul class="collab-list">
                         <li>
                             <span>{{ selected_project.user.get_username }} (owner)</span>
@@ -687,8 +687,8 @@
                         </form>
                     {% endif %}
                 </div>
-                <div class="comment-block">
-                    <h3 class="attachments-title">Discussion</h3>
+                <div class="comment-block detail-card">
+                    <h3 class="section-title">Discussion</h3>
                     {% if selected_project.comments_list %}
                         <ul class="comment-list">
                             {% for comment in selected_project.comments_list %}
@@ -708,38 +708,60 @@
                     </form>
                 </div>
 
-                <div class="link-header">
-                    <h3>Project links</h3>
-                    {% if can_edit_project %}
-                        <button type="button" class="action-btn" id="open-link-modal">Add link</button>
+                <div class="links-section detail-card">
+                    <div class="link-header">
+                        <h3 class="section-title">Project links</h3>
+                        {% if can_edit_project %}
+                            <button type="button" class="action-btn" id="open-link-modal">Add link</button>
+                        {% endif %}
+                    </div>
+
+                    {% if selected_project.links.all %}
+                        <ul class="link-list">
+                            {% for link in selected_project.links.all %}
+                                <li>
+                                    <div class="link-item-top">
+                                        <div class="link-name">{{ link.name }}</div>
+                                        <div class="inline-actions">
+                                            {% if can_edit_project %}
+                                                <button type="button" class="btn-inline open-edit-link-modal" data-link-id="{{ link.pk }}" data-link-name="{{ link.name }}" data-link-url="{{ link.url }}">Edit</button>
+                                                <form method="post" class="inline-form" onsubmit="return confirm('Delete this project link?');">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="form_type" value="delete_link">
+                                                    <input type="hidden" name="link_id" value="{{ link.pk }}">
+                                                    <button type="submit" class="btn-inline-danger">Delete</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.url }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="empty-note">No links added for this project yet.</p>
                     {% endif %}
                 </div>
 
-                {% if selected_project.links.all %}
-                    <ul class="link-list">
-                        {% for link in selected_project.links.all %}
-                            <li>
-                                <div class="link-item-top">
-                                    <div class="link-name">{{ link.name }}</div>
-                                    <div class="inline-actions">
-                                        {% if can_edit_project %}
-                                            <button type="button" class="btn-inline open-edit-link-modal" data-link-id="{{ link.pk }}" data-link-name="{{ link.name }}" data-link-url="{{ link.url }}">Edit</button>
-                                            <form method="post" class="inline-form" onsubmit="return confirm('Delete this project link?');">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="form_type" value="delete_link">
-                                                <input type="hidden" name="link_id" value="{{ link.pk }}">
-                                                <button type="submit" class="btn-inline-danger">Delete</button>
-                                            </form>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.url }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="empty-note">No links added for this project yet.</p>
-                {% endif %}
+                <div class="tags-block-plain">
+                    {% if selected_project.tags_list %}
+                        <ul class="tag-list">
+                            {% for tag in selected_project.tags_list %}
+                                <li>{{ tag.label }}<form method="post" class="tag-delete-form">{% csrf_token %}<input type="hidden" name="form_type" value="delete_tag"><input type="hidden" name="tag_id" value="{{ tag.pk }}"><input type="hidden" name="project_context" value="{{ selected_project.pk }}"><button type="submit" class="tag-delete-btn" aria-label="Remove tag {{ tag.label }}" title="Remove tag">&times;</button></form></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="tag-add-project-{{ selected_project.pk }}">Add tag</button>
+                    <form method="post" class="tag-add-form" id="tag-add-project-{{ selected_project.pk }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_tag">
+                        <input type="hidden" name="content_type_id" value="{{ ct_project_id }}">
+                        <input type="hidden" name="object_id" value="{{ selected_project.pk }}">
+                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                        <input type="text" name="label" placeholder="#math">
+                        <button type="submit">Save tag</button>
+                    </form>
+                </div>
             {% else %}
                 <h2>No project selected</h2>
                 <p class="empty-note">Create a project to see details and related links here.</p>

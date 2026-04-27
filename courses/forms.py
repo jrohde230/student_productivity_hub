@@ -34,3 +34,11 @@ class TextbookForm(forms.ModelForm):
         if self.user and course.user_id != self.user.id:
             raise forms.ValidationError("Invalid course.")
         return course
+
+
+class EditTextbookForm(forms.ModelForm):
+    """Edit title and URL only; course cannot be changed here."""
+
+    class Meta:
+        model = Textbook
+        fields = ["title", "url"]
