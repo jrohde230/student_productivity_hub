@@ -297,6 +297,56 @@
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
     }
+    .attachments-block {
+        margin-top: 0.3rem;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.3rem;
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+    .attachments-list {
+        list-style: none;
+        margin: 0 0 0.25rem;
+        padding: 0;
+        display: grid;
+        gap: 0.22rem;
+    }
+    .attachments-list li {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.24rem 0.35rem;
+        font-size: 0.76rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .attachment-link {
+        word-break: break-word;
+    }
+    .attachment-actions button {
+        width: auto;
+        padding: 0.12rem 0.34rem;
+        font-size: 0.7rem;
+    }
+    .attachment-add-form {
+        display: none;
+        margin-top: 0.2rem;
+    }
+    .attachment-add-form.open {
+        display: block;
+    }
+    .attachment-add-form input[type="file"] {
+        padding: 0.2rem 0;
+        font-size: 0.74rem;
+    }
+    .attachment-add-form button {
+        width: auto;
+        margin-top: 0.2rem;
+        padding: 0.18rem 0.45rem;
+        font-size: 0.74rem;
+    }
     .column-empty {
         margin: 0.5rem 0 0;
         font-size: 0.88rem;
@@ -448,6 +498,32 @@
                                         <input type="hidden" name="object_id" value="{{ item.pk }}">
                                         <input type="text" name="label" placeholder="#math">
                                         <button type="submit">Save tag</button>
+                                    </form>
+                                </div>
+                                <div class="attachments-block">
+                                    {% if item.attachments_list %}
+                                        <ul class="attachments-list">
+                                            {% for attachment in item.attachments_list %}
+                                                <li>
+                                                    <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
+                                                    <form method="post" class="attachment-actions">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="form_type" value="delete_attachment">
+                                                        <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
+                                                        <button type="submit" class="btn-delete">Remove</button>
+                                                    </form>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-resource-{{ item.pk }}">Add attachment</button>
+                                    <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-resource-{{ item.pk }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_type" value="add_attachment">
+                                        <input type="hidden" name="content_type_id" value="{{ ct_resource_item_id }}">
+                                        <input type="hidden" name="object_id" value="{{ item.pk }}">
+                                        <input type="file" name="file">
+                                        <button type="submit">Upload file</button>
                                     </form>
                                 </div>
                             </li>

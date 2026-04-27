@@ -4,6 +4,13 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
+from attachments.forms import AttachmentUploadForm
+from attachments.services import (
+    attachments_by_target,
+    attachments_for_target,
+    create_attachment_for_target,
+    delete_attachment_for_user,
+)
 from notes.forms import NoteCreateForm, NoteEditForm
 from notes.services import (
     allowed_content_types,
@@ -46,17 +53,21 @@ class HomeView(LoginRequiredMixin, TemplateView):
             targets.extend(list(course.textbooks.all()))
         grouped_notes = notes_by_target(self.request.user, targets)
         grouped_tags = tags_by_target(self.request.user, targets)
+        grouped_attachments = attachments_by_target(self.request.user, targets)
 
         for course in courses:
             course.notes_list = notes_for_target(grouped_notes, course)
             course.tags_list = tags_for_target(grouped_tags, course)
+            course.attachments_list = attachments_for_target(grouped_attachments, course)
             for textbook in course.textbooks.all():
                 textbook.notes_list = notes_for_target(grouped_notes, textbook)
                 textbook.tags_list = tags_for_target(grouped_tags, textbook)
+                textbook.attachments_list = attachments_for_target(grouped_attachments, textbook)
 
         context["ct_course_id"] = ct_map[Course].id
         context["ct_textbook_id"] = ct_map[Textbook].id
         context["tag_form"] = TagCreateForm()
+        context["attachment_form"] = AttachmentUploadForm()
 
         if "course_form" in kwargs:
             context["course_form"] = kwargs["course_form"]
@@ -169,6 +180,34 @@ class HomeView(LoginRequiredMixin, TemplateView):
                     messages.error(request, "Unable to attach tag to that item.")
             else:
                 messages.error(request, "Tag cannot be empty.")
+            return redirect(self.success_url)
+
+        if form_type == "add_attachment":
+            form = AttachmentUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                attachment = create_attachment_for_target(
+                    user=request.user,
+                    content_type_id=request.POST.get("content_type_id"),
+                    object_id=request.POST.get("object_id"),
+                    file_obj=form.cleaned_data["file"],
+                )
+                if attachment:
+                    messages.success(request, "Attachment uploaded.")
+                else:
+                    messages.error(request, "Unable to upload attachment.")
+            else:
+                messages.error(request, "Please choose a file to upload.")
+            return redirect(self.success_url)
+
+        if form_type == "delete_attachment":
+            deleted = delete_attachment_for_user(
+                user=request.user,
+                attachment_id=request.POST.get("attachment_id"),
+            )
+            if deleted:
+                messages.success(request, "Attachment removed.")
+            else:
+                messages.error(request, "Unable to remove attachment.")
             return redirect(self.success_url)
 
         if form_type == "delete_tag":

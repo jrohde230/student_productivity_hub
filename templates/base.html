@@ -20,7 +20,7 @@
         .top-nav-inner {
             max-width: 1320px;
             margin: 0 auto;
-            padding: 1.8rem 1rem;
+            padding: 1.6rem 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -90,6 +90,126 @@
         .nav-links a:hover {
             background: rgba(255, 255, 255, 0.12);
             color: #ffffff;
+        }
+        .nav-link-btn {
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            color: #fff;
+            width: auto;
+            padding: 0.45rem 0.8rem;
+            font-size: 1rem;
+            box-shadow: none;
+            filter: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .nav-link-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            box-shadow: none;
+            filter: none;
+        }
+        .notif-badge {
+            min-width: 1.1rem;
+            height: 1.1rem;
+            border-radius: 999px;
+            background: #ffffff;
+            color: #5b21b6;
+            font-size: 0.72rem;
+            line-height: 1.1rem;
+            text-align: center;
+            padding: 0 0.2rem;
+            font-weight: 700;
+        }
+        .notif-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            display: none;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 4.7rem 1.4rem 1rem;
+            z-index: 2100;
+        }
+        .notif-overlay.open {
+            display: flex;
+        }
+        .notif-window {
+            width: min(100%, 360px);
+            background: #fff;
+            border: 1px solid #d8b4fe;
+            border-radius: 10px;
+            box-shadow: 0 10px 28px rgba(76, 29, 149, 0.2);
+            overflow: hidden;
+        }
+        .notif-header {
+            padding: 0.7rem 0.85rem;
+            border-bottom: 1px solid #f0e4ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notif-title {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #4c1d95;
+        }
+        .notif-close {
+            width: auto;
+            background: transparent;
+            color: #5b21b6;
+            border: 0;
+            padding: 0.12rem 0.35rem;
+            line-height: 1;
+            box-shadow: none;
+            filter: none;
+        }
+        .notif-close:hover {
+            background: #f3e8ff;
+            color: #4c1d95;
+            box-shadow: none;
+            filter: none;
+        }
+        .notif-list {
+            list-style: none;
+            margin: 0;
+            padding: 0.45rem;
+            max-height: 330px;
+            overflow: auto;
+        }
+        .notif-item {
+            border: 1px solid #eadcff;
+            border-radius: 8px;
+            background: #fbf7ff;
+            padding: 0.5rem 0.55rem;
+            margin-bottom: 0.45rem;
+        }
+        .notif-item:last-child {
+            margin-bottom: 0;
+        }
+        .notif-item a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .notif-item-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #3b2b5a;
+            margin-bottom: 0.2rem;
+            word-break: break-word;
+        }
+        .notif-item-meta {
+            font-size: 0.78rem;
+            color: #5f5575;
+        }
+        .notif-empty {
+            margin: 0;
+            padding: 0.8rem;
+            font-size: 0.86rem;
+            color: #5f5575;
         }
         .container {
             max-width: 560px;
@@ -182,7 +302,14 @@
             </div>
             <ul class="nav-links">
                 <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                <li><a href="#">Notifications</a></li>
+                <li>
+                    <button type="button" class="nav-link-btn" id="open-notifications">
+                        Notifications
+                        {% if upcoming_notifications_count %}
+                            <span class="notif-badge">{{ upcoming_notifications_count }}</span>
+                        {% endif %}
+                    </button>
+                </li>
                 <li><a href="{% url 'profile' %}">Profile</a></li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -190,6 +317,28 @@
             </ul>
         </div>
     </header>
+    <div class="notif-overlay" id="notif-overlay">
+        <div class="notif-window" role="dialog" aria-modal="true" aria-labelledby="notif-title">
+            <div class="notif-header">
+                <h2 class="notif-title" id="notif-title">Upcoming due dates</h2>
+                <button type="button" class="notif-close" id="close-notifications" aria-label="Close notifications">&times;</button>
+            </div>
+            {% if upcoming_notifications %}
+                <ul class="notif-list">
+                    {% for n in upcoming_notifications %}
+                        <li class="notif-item">
+                            <a href="{{ n.url }}">
+                                <div class="notif-item-title">{{ n.title }}</div>
+                                <div class="notif-item-meta">{{ n.class_name }} · {{ n.timing }} ({{ n.due_date|date:"M j" }})</div>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="notif-empty">No upcoming due dates in the next week.</p>
+            {% endif %}
+        </div>
+    </div>
     <main class="container{% block container_class %}{% endblock %}">
         {% if messages %}
             <ul class="messages">
@@ -200,5 +349,34 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
+    <script>
+        (function () {
+            var openBtn = document.getElementById("open-notifications");
+            var closeBtn = document.getElementById("close-notifications");
+            var overlay = document.getElementById("notif-overlay");
+            if (!openBtn || !closeBtn || !overlay) return;
+
+            function openNotifications() {
+                overlay.classList.add("open");
+            }
+
+            function closeNotifications() {
+                overlay.classList.remove("open");
+            }
+
+            openBtn.addEventListener("click", openNotifications);
+            closeBtn.addEventListener("click", closeNotifications);
+            overlay.addEventListener("click", function (event) {
+                if (event.target === overlay) {
+                    closeNotifications();
+                }
+            });
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    closeNotifications();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

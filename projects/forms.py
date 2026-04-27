@@ -1,7 +1,11 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
-from .models import Project, ProjectLink
+from .models import Project, ProjectComment, ProjectLink
+
+User = get_user_model()
 
 
 class ProjectForm(forms.ModelForm):
@@ -20,11 +24,15 @@ class ProjectLinkForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
         if user is not None:
-            self.fields['project'].queryset = Project.objects.filter(user=user)
+            self.fields['project'].queryset = Project.objects.filter(
+                Q(user=user) | Q(collaborators__user=user)
+            ).distinct()
 
     def clean_project(self):
         project = self.cleaned_data['project']
-        if self.user and project.user_id != self.user.id:
+        is_owner = project.user_id == self.user.id
+        is_collaborator = project.collaborators.filter(user=self.user).exists()
+        if self.user and not (is_owner or is_collaborator):
             raise ValidationError('Invalid project.')
         return project
 
@@ -44,7 +52,10 @@ class EditProjectForm(forms.Form):
         project_id = cleaned.get('project_id')
         if project_id is None or self.user is None:
             return cleaned
-        project = Project.objects.filter(pk=project_id, user=self.user).first()
+        project = Project.objects.filter(
+            Q(pk=project_id),
+            Q(user=self.user) | Q(collaborators__user=self.user),
+        ).distinct().first()
         if not project:
             raise ValidationError('Invalid project.')
         self._project = project
@@ -72,7 +83,10 @@ class EditProjectLinkForm(forms.Form):
         link_id = cleaned.get('link_id')
         if link_id is None or self.user is None:
             return cleaned
-        link = ProjectLink.objects.filter(pk=link_id, project__user=self.user).first()
+        link = ProjectLink.objects.filter(
+            Q(pk=link_id),
+            Q(project__user=self.user) | Q(project__collaborators__user=self.user),
+        ).distinct().first()
         if not link:
             raise ValidationError('Invalid project link.')
         self._link = link
@@ -83,3 +97,17 @@ class EditProjectLinkForm(forms.Form):
         self._link.url = self.cleaned_data['url']
         self._link.save(update_fields=['name', 'url'])
         return self._link
+
+
+class CollaboratorInviteForm(forms.Form):
+    email = forms.EmailField()
+
+    def clean_email(self):
+        return self.cleaned_data["email"].strip().lower()
+
+
+class ProjectCommentForm(forms.ModelForm):
+    class Meta:
+        model = ProjectComment
+        fields = ["body"]
+        widgets = {"body": forms.Textarea(attrs={"rows": 2})}

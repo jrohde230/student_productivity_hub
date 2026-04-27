@@ -62,6 +62,40 @@
         gap: 0.75rem;
         flex-wrap: wrap;
     }
+    .assignment-head-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+    .btn-inline {
+        width: auto;
+        padding: 0.25rem 0.55rem;
+        font-size: 0.8rem;
+        border-radius: 5px;
+        border: 1px solid #dce3eb;
+        background: #fff;
+        color: #344054;
+    }
+    .btn-inline:hover {
+        background: #f3e8ff;
+        border-color: #7c3aed;
+        color: #4c1d95;
+    }
+    .btn-inline-danger {
+        width: auto;
+        padding: 0.25rem 0.55rem;
+        font-size: 0.8rem;
+        border-radius: 5px;
+        border: 1px solid #f0b4b4;
+        background: #fff5f5;
+        color: #8a1f1f;
+    }
+    .btn-inline-danger:hover {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+    }
     .assignment-title {
         font-weight: 600;
     }
@@ -145,6 +179,118 @@
         margin-top: 0.5rem;
         border-top: 1px solid #eef2f6;
         padding-top: 0.45rem;
+    }
+    .checklist-block {
+        margin-top: 0.55rem;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.45rem;
+    }
+    .checklist-title {
+        margin: 0 0 0.35rem;
+        font-size: 0.85rem;
+        color: #445;
+    }
+    .checklist-list {
+        list-style: none;
+        margin: 0 0 0.35rem;
+        padding: 0;
+        display: grid;
+        gap: 0.22rem;
+    }
+    .checklist-item {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.28rem 0.42rem;
+        font-size: 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .checklist-item.done .item-text {
+        text-decoration: line-through;
+        color: #7a8290;
+    }
+    .checklist-actions {
+        display: inline-flex;
+        gap: 0.28rem;
+        align-items: center;
+    }
+    .checklist-actions button {
+        width: auto;
+        padding: 0.14rem 0.42rem;
+        font-size: 0.72rem;
+    }
+    .checklist-add-form {
+        display: none;
+        margin-top: 0.3rem;
+    }
+    .checklist-add-form.open {
+        display: block;
+    }
+    .checklist-add-form input {
+        padding: 0.35rem 0.45rem;
+        font-size: 0.82rem;
+    }
+    .checklist-add-form button {
+        width: auto;
+        margin-top: 0.3rem;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.78rem;
+    }
+    .attachments-block {
+        margin-top: 0.55rem;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.45rem;
+    }
+    .attachments-title {
+        margin: 0 0 0.35rem;
+        font-size: 0.85rem;
+        color: #445;
+    }
+    .attachments-list {
+        list-style: none;
+        margin: 0 0 0.35rem;
+        padding: 0;
+        display: grid;
+        gap: 0.22rem;
+    }
+    .attachments-list li {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.28rem 0.42rem;
+        font-size: 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .attachment-link {
+        word-break: break-word;
+    }
+    .attachment-actions button {
+        width: auto;
+        padding: 0.14rem 0.42rem;
+        font-size: 0.72rem;
+    }
+    .attachment-add-form {
+        display: none;
+        margin-top: 0.3rem;
+    }
+    .attachment-add-form.open {
+        display: block;
+    }
+    .attachment-add-form input[type="file"] {
+        padding: 0.3rem 0;
+        font-size: 0.82rem;
+    }
+    .attachment-add-form button {
+        width: auto;
+        margin-top: 0.3rem;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.78rem;
     }
     .tag-list {
         list-style: none;
@@ -275,7 +421,27 @@
                             {% else %}
                                 <span class="assignment-title">{{ assignment.assignment_name }}</span>
                             {% endif %}
-                            <span>{{ assignment.due_date }}</span>
+                            <div class="assignment-head-actions">
+                                <span>{{ assignment.due_date }}</span>
+                                <button
+                                    type="button"
+                                    class="btn-inline open-edit-assignment-modal"
+                                    data-assignment-id="{{ assignment.pk }}"
+                                    data-assignment-name="{{ assignment.assignment_name }}"
+                                    data-class-name="{{ assignment.class_name }}"
+                                    data-subject="{{ assignment.subject }}"
+                                    data-due-date="{{ assignment.due_date|date:'Y-m-d' }}"
+                                    data-assignment-url="{{ assignment.assignment_url }}"
+                                >
+                                    Edit
+                                </button>
+                                <form method="post" onsubmit="return confirm('Delete this assignment?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form_type" value="delete_assignment">
+                                    <input type="hidden" name="assignment_id" value="{{ assignment.pk }}">
+                                    <button type="submit" class="btn-inline-danger">Delete</button>
+                                </form>
+                            </div>
                         </div>
                         <div class="meta">
                             Class: {{ assignment.class_name }} | Subject: {{ assignment.subject }}
@@ -335,6 +501,69 @@
                                 <button type="submit">Save tag</button>
                             </form>
                         </div>
+                        <div class="checklist-block">
+                            <p class="checklist-title">Checklist</p>
+                            {% if assignment.checklist_items %}
+                                <ul class="checklist-list">
+                                    {% for item in assignment.checklist_items %}
+                                        <li class="checklist-item{% if item.is_done %} done{% endif %}">
+                                            <span class="item-text">{{ item.text }}</span>
+                                            <div class="checklist-actions">
+                                                <form method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="form_type" value="toggle_checklist_item">
+                                                    <input type="hidden" name="item_id" value="{{ item.pk }}">
+                                                    <input type="hidden" name="is_done" value="{% if item.is_done %}0{% else %}1{% endif %}">
+                                                    <button type="submit">{% if item.is_done %}Undo{% else %}Done{% endif %}</button>
+                                                </form>
+                                                <form method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="form_type" value="delete_checklist_item">
+                                                    <input type="hidden" name="item_id" value="{{ item.pk }}">
+                                                    <button type="submit" class="btn-inline-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="checklist-add-assignment-{{ assignment.pk }}">Add subtask</button>
+                            <form method="post" class="checklist-add-form" id="checklist-add-assignment-{{ assignment.pk }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_checklist_item">
+                                <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
+                                <input type="hidden" name="object_id" value="{{ assignment.pk }}">
+                                <input type="text" name="text" placeholder="e.g. Draft outline">
+                                <button type="submit">Save subtask</button>
+                            </form>
+                        </div>
+                        <div class="attachments-block">
+                            <p class="attachments-title">Attachments</p>
+                            {% if assignment.attachments_list %}
+                                <ul class="attachments-list">
+                                    {% for attachment in assignment.attachments_list %}
+                                        <li>
+                                            <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
+                                            <form method="post" class="attachment-actions">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="form_type" value="delete_attachment">
+                                                <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
+                                                <button type="submit" class="btn-inline-danger">Remove</button>
+                                            </form>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-assignment-{{ assignment.pk }}">Add attachment</button>
+                            <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-assignment-{{ assignment.pk }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_attachment">
+                                <input type="hidden" name="content_type_id" value="{{ ct_assignment_id }}">
+                                <input type="hidden" name="object_id" value="{{ assignment.pk }}">
+                                <input type="file" name="file">
+                                <button type="submit">Upload file</button>
+                            </form>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
@@ -357,11 +586,46 @@
         </div>
     </div>
 
+    <div class="modal-overlay{% if open_edit_assignment_modal %} open{% endif %}" id="edit-assignment-modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-assignment-title">
+            <div class="modal-header">
+                <h2 id="edit-assignment-title">Edit assignment</h2>
+                <button type="button" id="close-edit-assignment-modal" class="close-btn">Close</button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="edit_assignment">
+                {% for field in edit_assignment_form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+                {% for field in edit_assignment_form.visible_fields %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}<span class="errors">{{ field.errors }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+                {% if edit_assignment_form.non_field_errors %}
+                    <div class="errors">{{ edit_assignment_form.non_field_errors }}</div>
+                {% endif %}
+                <button type="submit">Save changes</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         (function () {
             var openBtn = document.getElementById("open-assignment-modal");
             var closeBtn = document.getElementById("close-assignment-modal");
             var overlay = document.getElementById("assignment-modal-overlay");
+            var editOverlay = document.getElementById("edit-assignment-modal-overlay");
+            var closeEditBtn = document.getElementById("close-edit-assignment-modal");
+            var editIdInput = document.getElementById("id_editassign-assignment_id");
+            var editClassInput = document.getElementById("id_editassign-class_name");
+            var editNameInput = document.getElementById("id_editassign-assignment_name");
+            var editUrlInput = document.getElementById("id_editassign-assignment_url");
+            var editDueInput = document.getElementById("id_editassign-due_date");
+            var editSubjectInput = document.getElementById("id_editassign-subject");
 
             function openModal() {
                 overlay.classList.add("open");
@@ -370,19 +634,54 @@
             function closeModal() {
                 overlay.classList.remove("open");
             }
+            function openEditModal(data) {
+                if (editIdInput) editIdInput.value = data.assignmentId || "";
+                if (editClassInput) editClassInput.value = data.className || "";
+                if (editNameInput) editNameInput.value = data.assignmentName || "";
+                if (editUrlInput) editUrlInput.value = data.assignmentUrl || "";
+                if (editDueInput) editDueInput.value = data.dueDate || "";
+                if (editSubjectInput) editSubjectInput.value = data.subject || "";
+                editOverlay.classList.add("open");
+            }
+            function closeEditModal() {
+                editOverlay.classList.remove("open");
+            }
 
             openBtn.addEventListener("click", openModal);
             closeBtn.addEventListener("click", closeModal);
+            if (closeEditBtn) {
+                closeEditBtn.addEventListener("click", closeEditModal);
+            }
+            document.querySelectorAll(".open-edit-assignment-modal").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    openEditModal({
+                        assignmentId: btn.getAttribute("data-assignment-id"),
+                        className: btn.getAttribute("data-class-name"),
+                        assignmentName: btn.getAttribute("data-assignment-name"),
+                        assignmentUrl: btn.getAttribute("data-assignment-url"),
+                        dueDate: btn.getAttribute("data-due-date"),
+                        subject: btn.getAttribute("data-subject"),
+                    });
+                });
+            });
 
             overlay.addEventListener("click", function (event) {
                 if (event.target === overlay) {
                     closeModal();
                 }
             });
+            if (editOverlay) {
+                editOverlay.addEventListener("click", function (event) {
+                    if (event.target === editOverlay) {
+                        closeEditModal();
+                    }
+                });
+            }
 
             document.addEventListener("keydown", function (event) {
                 if (event.key === "Escape") {
                     closeModal();
+                    closeEditModal();
                 }
             });
 

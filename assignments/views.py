@@ -4,6 +4,21 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
+from checklists.forms import ChecklistItemCreateForm
+from checklists.services import (
+    create_item_for_target,
+    delete_item_for_user,
+    items_by_target,
+    items_for_target,
+    set_item_done_for_user,
+)
+from attachments.forms import AttachmentUploadForm
+from attachments.services import (
+    attachments_by_target,
+    attachments_for_target,
+    create_attachment_for_target,
+    delete_attachment_for_user,
+)
 from notes.forms import NoteCreateForm, NoteEditForm
 from notes.services import (
     allowed_content_types,
@@ -20,7 +35,7 @@ from tags.services import (
     tags_by_target,
     tags_for_target,
 )
-from .forms import AssignmentForm
+from .forms import AssignmentForm, EditAssignmentForm
 from .models import Assignment
 
 
@@ -51,9 +66,13 @@ class HomeView(LoginRequiredMixin, FormView):
         ct_map = allowed_content_types()
         grouped_notes = notes_by_target(self.request.user, assignments)
         grouped_tags = tags_by_target(self.request.user, assignments)
+        grouped_items = items_by_target(self.request.user, assignments)
+        grouped_attachments = attachments_by_target(self.request.user, assignments)
         for assignment in assignments:
             assignment.notes_list = notes_for_target(grouped_notes, assignment)
             assignment.tags_list = tags_for_target(grouped_tags, assignment)
+            assignment.checklist_items = items_for_target(grouped_items, assignment)
+            assignment.attachments_list = attachments_for_target(grouped_attachments, assignment)
 
         context["selected_sort"] = sort_key
         context["assignments"] = assignments
@@ -61,6 +80,13 @@ class HomeView(LoginRequiredMixin, FormView):
         context["note_form"] = NoteCreateForm()
         context["note_edit_form"] = NoteEditForm()
         context["tag_form"] = TagCreateForm()
+        context["checklist_form"] = ChecklistItemCreateForm()
+        context["attachment_form"] = AttachmentUploadForm()
+        context["edit_assignment_form"] = kwargs.get(
+            "edit_assignment_form",
+            EditAssignmentForm(prefix="editassign", user=self.request.user),
+        )
+        context["open_edit_assignment_modal"] = kwargs.get("open_edit_assignment_modal", False)
         return context
 
     def form_valid(self, form):
@@ -71,6 +97,32 @@ class HomeView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def post(self, request, *args, **kwargs):
+        if request.POST.get("form_type") == "edit_assignment":
+            form = EditAssignmentForm(request.POST, prefix="editassign", user=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Assignment updated.")
+                return redirect(self.success_url)
+            messages.error(request, "Unable to update assignment.")
+            return self.render_to_response(
+                self.get_context_data(
+                    edit_assignment_form=form,
+                    open_edit_assignment_modal=True,
+                )
+            )
+
+        if request.POST.get("form_type") == "delete_assignment":
+            assignment = Assignment.objects.filter(
+                pk=request.POST.get("assignment_id"),
+                user=request.user,
+            ).first()
+            if assignment:
+                assignment.delete()
+                messages.success(request, "Assignment deleted.")
+            else:
+                messages.error(request, "Unable to delete that assignment.")
+            return redirect(self.success_url)
+
         if request.POST.get("form_type") == "add_note":
             form = NoteCreateForm(request.POST)
             if form.is_valid():
@@ -86,6 +138,64 @@ class HomeView(LoginRequiredMixin, FormView):
                     messages.error(request, "Unable to attach note to that item.")
             else:
                 messages.error(request, "Note cannot be empty.")
+            return redirect(self.success_url)
+        if request.POST.get("form_type") == "add_checklist_item":
+            form = ChecklistItemCreateForm(request.POST)
+            if form.is_valid():
+                item = create_item_for_target(
+                    user=request.user,
+                    content_type_id=request.POST.get("content_type_id"),
+                    object_id=request.POST.get("object_id"),
+                    text=form.cleaned_data["text"],
+                )
+                if item:
+                    messages.success(request, "Checklist item added.")
+                else:
+                    messages.error(request, "Unable to add checklist item.")
+            else:
+                messages.error(request, "Checklist item cannot be empty.")
+            return redirect(self.success_url)
+        if request.POST.get("form_type") == "add_attachment":
+            form = AttachmentUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                attachment = create_attachment_for_target(
+                    user=request.user,
+                    content_type_id=request.POST.get("content_type_id"),
+                    object_id=request.POST.get("object_id"),
+                    file_obj=form.cleaned_data["file"],
+                )
+                if attachment:
+                    messages.success(request, "Attachment uploaded.")
+                else:
+                    messages.error(request, "Unable to upload attachment.")
+            else:
+                messages.error(request, "Please choose a file to upload.")
+            return redirect(self.success_url)
+        if request.POST.get("form_type") == "delete_attachment":
+            deleted = delete_attachment_for_user(
+                user=request.user,
+                attachment_id=request.POST.get("attachment_id"),
+            )
+            if deleted:
+                messages.success(request, "Attachment removed.")
+            else:
+                messages.error(request, "Unable to remove attachment.")
+            return redirect(self.success_url)
+        if request.POST.get("form_type") == "toggle_checklist_item":
+            item = set_item_done_for_user(
+                user=request.user,
+                item_id=request.POST.get("item_id"),
+                is_done=request.POST.get("is_done") == "1",
+            )
+            if not item:
+                messages.error(request, "Unable to update checklist item.")
+            return redirect(self.success_url)
+        if request.POST.get("form_type") == "delete_checklist_item":
+            deleted = delete_item_for_user(user=request.user, item_id=request.POST.get("item_id"))
+            if deleted:
+                messages.success(request, "Checklist item removed.")
+            else:
+                messages.error(request, "Unable to remove checklist item.")
             return redirect(self.success_url)
         if request.POST.get("form_type") == "edit_note":
             form = NoteEditForm(request.POST)

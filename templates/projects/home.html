@@ -230,6 +230,165 @@
         border-top: 1px solid #e5eaf0;
         padding-top: 0.5rem;
     }
+    .checklist-block {
+        margin-top: 0.75rem;
+        border-top: 1px solid #e5eaf0;
+        padding-top: 0.5rem;
+    }
+    .checklist-title {
+        margin: 0 0 0.35rem;
+        font-size: 0.92rem;
+        color: #445;
+    }
+    .checklist-list {
+        list-style: none;
+        margin: 0 0 0.35rem;
+        padding: 0;
+        display: grid;
+        gap: 0.24rem;
+    }
+    .checklist-item {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.32rem 0.45rem;
+        font-size: 0.82rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .checklist-item.done .item-text {
+        text-decoration: line-through;
+        color: #7a8290;
+    }
+    .checklist-actions {
+        display: inline-flex;
+        gap: 0.28rem;
+        align-items: center;
+    }
+    .checklist-actions button {
+        width: auto;
+        padding: 0.14rem 0.42rem;
+        font-size: 0.72rem;
+    }
+    .checklist-add-form {
+        display: none;
+        margin-top: 0.3rem;
+    }
+    .checklist-add-form.open {
+        display: block;
+    }
+    .checklist-add-form input {
+        padding: 0.35rem 0.45rem;
+        font-size: 0.82rem;
+    }
+    .checklist-add-form button {
+        width: auto;
+        margin-top: 0.3rem;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.78rem;
+    }
+    .attachments-block {
+        margin-top: 0.75rem;
+        border-top: 1px solid #e5eaf0;
+        padding-top: 0.5rem;
+    }
+    .collab-block {
+        margin-top: 0.75rem;
+        border-top: 1px solid #e5eaf0;
+        padding-top: 0.5rem;
+    }
+    .collab-list {
+        list-style: none;
+        margin: 0 0 0.4rem;
+        padding: 0;
+        display: grid;
+        gap: 0.22rem;
+    }
+    .collab-list li {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.28rem 0.42rem;
+        font-size: 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .comment-block {
+        margin-top: 0.75rem;
+        border-top: 1px solid #e5eaf0;
+        padding-top: 0.5rem;
+    }
+    .comment-list {
+        list-style: none;
+        margin: 0 0 0.35rem;
+        padding: 0;
+        display: grid;
+        gap: 0.24rem;
+    }
+    .comment-list li {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.35rem 0.45rem;
+        font-size: 0.82rem;
+    }
+    .comment-meta {
+        font-size: 0.72rem;
+        color: #6b7280;
+        margin-top: 0.18rem;
+    }
+    .attachments-title {
+        margin: 0 0 0.35rem;
+        font-size: 0.92rem;
+        color: #445;
+    }
+    .attachments-list {
+        list-style: none;
+        margin: 0 0 0.35rem;
+        padding: 0;
+        display: grid;
+        gap: 0.24rem;
+    }
+    .attachments-list li {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.32rem 0.45rem;
+        font-size: 0.82rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .attachment-link {
+        word-break: break-word;
+    }
+    .attachment-actions button {
+        width: auto;
+        padding: 0.14rem 0.42rem;
+        font-size: 0.72rem;
+    }
+    .attachment-add-form {
+        display: none;
+        margin-top: 0.3rem;
+    }
+    .attachment-add-form.open {
+        display: block;
+    }
+    .attachment-add-form input[type="file"] {
+        padding: 0.3rem 0;
+        font-size: 0.82rem;
+    }
+    .attachment-add-form button {
+        width: auto;
+        margin-top: 0.3rem;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.78rem;
+    }
     .tag-list {
         list-style: none;
         margin: 0 0 0.3rem;
@@ -351,13 +510,17 @@
                 <div class="details-header">
                     <h2>{{ selected_project.name }}</h2>
                     <div class="details-actions">
-                        <button type="button" class="btn-inline open-edit-project-modal" data-project-id="{{ selected_project.pk }}" data-project-name="{{ selected_project.name }}" data-project-description="{{ selected_project.description|default:'' }}">Edit project</button>
-                        <form method="post" class="inline-form" onsubmit="return confirm('Delete this project and all its links?');">
-                            {% csrf_token %}
-                            <input type="hidden" name="form_type" value="delete_project">
-                            <input type="hidden" name="project_id" value="{{ selected_project.pk }}">
-                            <button type="submit" class="btn-inline-danger">Delete project</button>
-                        </form>
+                        {% if can_edit_project %}
+                            <button type="button" class="btn-inline open-edit-project-modal" data-project-id="{{ selected_project.pk }}" data-project-name="{{ selected_project.name }}" data-project-description="{{ selected_project.description|default:'' }}">Edit project</button>
+                        {% endif %}
+                        {% if can_manage_collaborators %}
+                            <form method="post" class="inline-form" onsubmit="return confirm('Delete this project and all its links?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="delete_project">
+                                <input type="hidden" name="project_id" value="{{ selected_project.pk }}">
+                                <button type="submit" class="btn-inline-danger">Delete project</button>
+                            </form>
+                        {% endif %}
                     </div>
                 </div>
                 {% if selected_project.description %}
@@ -424,10 +587,132 @@
                         <button type="submit">Save tag</button>
                     </form>
                 </div>
+                <div class="checklist-block">
+                    <h3 class="checklist-title">Checklist</h3>
+                    {% if selected_project.checklist_items %}
+                        <ul class="checklist-list">
+                            {% for item in selected_project.checklist_items %}
+                                <li class="checklist-item{% if item.is_done %} done{% endif %}">
+                                    <span class="item-text">{{ item.text }}</span>
+                                    <div class="checklist-actions">
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="toggle_checklist_item">
+                                            <input type="hidden" name="item_id" value="{{ item.pk }}">
+                                            <input type="hidden" name="is_done" value="{% if item.is_done %}0{% else %}1{% endif %}">
+                                            <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                                            <button type="submit">{% if item.is_done %}Undo{% else %}Done{% endif %}</button>
+                                        </form>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_checklist_item">
+                                            <input type="hidden" name="item_id" value="{{ item.pk }}">
+                                            <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                                            <button type="submit" class="btn-inline-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="checklist-add-project-{{ selected_project.pk }}">Add subtask</button>
+                    <form method="post" class="checklist-add-form" id="checklist-add-project-{{ selected_project.pk }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_checklist_item">
+                        <input type="hidden" name="content_type_id" value="{{ ct_project_id }}">
+                        <input type="hidden" name="object_id" value="{{ selected_project.pk }}">
+                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                        <input type="text" name="text" placeholder="e.g. Implement API endpoint">
+                        <button type="submit">Save subtask</button>
+                    </form>
+                </div>
+                <div class="attachments-block">
+                    <h3 class="attachments-title">Attachments</h3>
+                    {% if selected_project.attachments_list %}
+                        <ul class="attachments-list">
+                            {% for attachment in selected_project.attachments_list %}
+                                <li>
+                                    <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
+                                    <form method="post" class="attachment-actions">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_type" value="delete_attachment">
+                                        <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
+                                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                                        <button type="submit" class="btn-inline-danger">Remove</button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-project-{{ selected_project.pk }}">Add attachment</button>
+                    <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-project-{{ selected_project.pk }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_attachment">
+                        <input type="hidden" name="content_type_id" value="{{ ct_project_id }}">
+                        <input type="hidden" name="object_id" value="{{ selected_project.pk }}">
+                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                        <input type="file" name="file">
+                        <button type="submit">Upload file</button>
+                    </form>
+                </div>
+                <div class="collab-block">
+                    <h3 class="attachments-title">Collaborators</h3>
+                    <ul class="collab-list">
+                        <li>
+                            <span>{{ selected_project.user.get_username }} (owner)</span>
+                        </li>
+                        {% for collab in selected_project.collaborators_list %}
+                            <li>
+                                <span>{{ collab.user.get_username }}{% if collab.user.email %} · {{ collab.user.email }}{% endif %}</span>
+                                {% if can_manage_collaborators %}
+                                    <form method="post" class="inline-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_type" value="remove_collaborator">
+                                        <input type="hidden" name="collaborator_id" value="{{ collab.user_id }}">
+                                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                                        <button type="submit" class="btn-inline-danger">Remove</button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% empty %}
+                        {% endfor %}
+                    </ul>
+                    {% if can_manage_collaborators %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="invite_collaborator">
+                            <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                            <input type="email" name="email" placeholder="Collaborator email">
+                            <button type="submit">Invite collaborator</button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div class="comment-block">
+                    <h3 class="attachments-title">Discussion</h3>
+                    {% if selected_project.comments_list %}
+                        <ul class="comment-list">
+                            {% for comment in selected_project.comments_list %}
+                                <li>
+                                    <div>{{ comment.body }}</div>
+                                    <div class="comment-meta">{{ comment.user.get_username }} · {{ comment.created_at|date:"M j, g:i a" }}</div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_project_comment">
+                        <input type="hidden" name="project_context" value="{{ selected_project.pk }}">
+                        <textarea name="comment-body" rows="2" placeholder="Add a comment"></textarea>
+                        <button type="submit">Post comment</button>
+                    </form>
+                </div>
 
                 <div class="link-header">
                     <h3>Project links</h3>
-                    <button type="button" class="action-btn" id="open-link-modal">Add link</button>
+                    {% if can_edit_project %}
+                        <button type="button" class="action-btn" id="open-link-modal">Add link</button>
+                    {% endif %}
                 </div>
 
                 {% if selected_project.links.all %}
@@ -437,13 +722,15 @@
                                 <div class="link-item-top">
                                     <div class="link-name">{{ link.name }}</div>
                                     <div class="inline-actions">
-                                        <button type="button" class="btn-inline open-edit-link-modal" data-link-id="{{ link.pk }}" data-link-name="{{ link.name }}" data-link-url="{{ link.url }}">Edit</button>
-                                        <form method="post" class="inline-form" onsubmit="return confirm('Delete this project link?');">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="form_type" value="delete_link">
-                                            <input type="hidden" name="link_id" value="{{ link.pk }}">
-                                            <button type="submit" class="btn-inline-danger">Delete</button>
-                                        </form>
+                                        {% if can_edit_project %}
+                                            <button type="button" class="btn-inline open-edit-link-modal" data-link-id="{{ link.pk }}" data-link-name="{{ link.name }}" data-link-url="{{ link.url }}">Edit</button>
+                                            <form method="post" class="inline-form" onsubmit="return confirm('Delete this project link?');">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="form_type" value="delete_link">
+                                                <input type="hidden" name="link_id" value="{{ link.pk }}">
+                                                <button type="submit" class="btn-inline-danger">Delete</button>
+                                            </form>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.url }}</a>

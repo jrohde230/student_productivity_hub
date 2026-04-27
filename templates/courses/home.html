@@ -92,6 +92,21 @@
         color: #4c1d95;
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.22);
     }
+    .btn-inline-danger {
+        width: auto;
+        padding: 0.22rem 0.5rem;
+        background: #fff5f5;
+        color: #8a1f1f;
+        border: 1px solid #f0b4b4;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        cursor: pointer;
+    }
+    .btn-inline-danger:hover {
+        background: #ffe4e4;
+        border-color: #dc2626;
+        color: #7f1d1d;
+    }
     .textbook-list {
         list-style: none;
         margin: 0;
@@ -219,6 +234,54 @@
     .tag-add-form button:hover {
         filter: brightness(1.06);
         box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.28);
+    }
+    .attachments-block {
+        margin-top: 0.55rem;
+        border-top: 1px solid #eef2f6;
+        padding-top: 0.45rem;
+    }
+    .attachments-list {
+        list-style: none;
+        margin: 0 0 0.35rem;
+        padding: 0;
+        display: grid;
+        gap: 0.22rem;
+    }
+    .attachments-list li {
+        border: 1px solid #e4e9f0;
+        border-radius: 6px;
+        background: #fafbfd;
+        padding: 0.28rem 0.42rem;
+        font-size: 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .attachment-link {
+        word-break: break-word;
+    }
+    .attachment-actions button {
+        width: auto;
+        padding: 0.14rem 0.42rem;
+        font-size: 0.72rem;
+    }
+    .attachment-add-form {
+        display: none;
+        margin-top: 0.3rem;
+    }
+    .attachment-add-form.open {
+        display: block;
+    }
+    .attachment-add-form input[type="file"] {
+        padding: 0.3rem 0;
+        font-size: 0.82rem;
+    }
+    .attachment-add-form button {
+        width: auto;
+        margin-top: 0.3rem;
+        padding: 0.28rem 0.6rem;
+        font-size: 0.78rem;
     }
     .empty-note {
         color: #5a6570;
@@ -374,6 +437,32 @@
                             <button type="submit">Save tag</button>
                         </form>
                     </div>
+                    <div class="attachments-block">
+                        {% if course.attachments_list %}
+                            <ul class="attachments-list">
+                                {% for attachment in course.attachments_list %}
+                                    <li>
+                                        <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
+                                        <form method="post" class="attachment-actions">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_attachment">
+                                            <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
+                                            <button type="submit" class="btn-inline-danger">Remove</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-course-{{ course.pk }}">Add attachment</button>
+                        <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-course-{{ course.pk }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="add_attachment">
+                            <input type="hidden" name="content_type_id" value="{{ ct_course_id }}">
+                            <input type="hidden" name="object_id" value="{{ course.pk }}">
+                            <input type="file" name="file">
+                            <button type="submit">Upload file</button>
+                        </form>
+                    </div>
                     {% with books=course.textbooks.all %}
                         {% if books %}
                             <ul class="textbook-list">
@@ -437,6 +526,32 @@
                                                 <input type="hidden" name="object_id" value="{{ book.pk }}">
                                                 <input type="text" name="label" placeholder="#math">
                                                 <button type="submit">Save tag</button>
+                                            </form>
+                                        </div>
+                                        <div class="attachments-block">
+                                            {% if book.attachments_list %}
+                                                <ul class="attachments-list">
+                                                    {% for attachment in book.attachments_list %}
+                                                        <li>
+                                                            <a class="attachment-link" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.original_name }}</a>
+                                                            <form method="post" class="attachment-actions">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="form_type" value="delete_attachment">
+                                                                <input type="hidden" name="attachment_id" value="{{ attachment.pk }}">
+                                                                <button type="submit" class="btn-inline-danger">Remove</button>
+                                                            </form>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                            <button type="button" class="note-edit-toggle note-add-toggle" data-target="attachment-add-textbook-{{ book.pk }}">Add attachment</button>
+                                            <form method="post" enctype="multipart/form-data" class="attachment-add-form" id="attachment-add-textbook-{{ book.pk }}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="form_type" value="add_attachment">
+                                                <input type="hidden" name="content_type_id" value="{{ ct_textbook_id }}">
+                                                <input type="hidden" name="object_id" value="{{ book.pk }}">
+                                                <input type="file" name="file">
+                                                <button type="submit">Upload file</button>
                                             </form>
                                         </div>
                                     </li>
