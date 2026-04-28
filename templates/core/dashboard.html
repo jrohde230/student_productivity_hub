@@ -15,20 +15,56 @@
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e5eaf0;
+        margin-bottom: 1.25rem;
+        padding: 1rem 1.15rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #faf7ff 0%, #ffffff 55%);
+        box-shadow: 0 1px 3px rgba(76, 29, 149, 0.06);
     }
-    .dash-header h1 { margin: 0; font-size: 1.35rem; }
+    .dash-header h1 { margin: 0; font-size: 1.35rem; color: #4c1d95; }
     .dash-sub { color: #5a6570; margin: 0.35rem 0 0 0; font-size: 0.95rem; }
     .dash-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-    .user-label { font-size: 0.9rem; color: #444; }
+    .user-label {
+        font-size: 0.9rem;
+        color: #5b21b6;
+        padding: 0.25rem 0.55rem;
+        background: rgba(237, 233, 254, 0.85);
+        border-radius: 6px;
+        border: 1px solid #e9d5ff;
+    }
+
+    .section-heading {
+        margin: 0 0 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4c1d95;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .features-panel {
+        border: 1px solid #ddd6fe;
+        border-radius: 10px;
+        background: #fafbfd;
+        padding: 0.85rem 0.9rem 1rem;
+        box-shadow: 0 1px 3px rgba(76, 29, 149, 0.05);
+    }
 
     .calendar-panel {
-        border: 1px solid #dce3eb;
-        border-radius: 8px;
-        background: #fafbfd;
-        padding: 1rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 10px;
+        background: #faf7ff;
+        padding: 1rem 1.05rem 1.1rem;
+        box-shadow: 0 1px 3px rgba(76, 29, 149, 0.06);
+    }
+    .calendar-heading {
+        margin: 0 0 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4c1d95;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
     }
     .dashboard-layout {
         display: grid;
@@ -47,7 +83,9 @@
         align-items: center;
         gap: 0.75rem;
         flex-wrap: wrap;
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.85rem;
+        padding-bottom: 0.65rem;
+        border-bottom: 1px solid rgba(196, 181, 253, 0.45);
     }
     .toolbar-left {
         display: flex;
@@ -58,6 +96,8 @@
     .month-title {
         margin: 0;
         font-size: 1.2rem;
+        color: #4c1d95;
+        font-weight: 600;
     }
     .btn-nav {
         display: inline-block;
@@ -95,8 +135,8 @@
     }
     .day-cell {
         min-height: 88px;
-        border: 1px solid #dce3eb;
-        border-radius: 6px;
+        border: 1px solid #e9d5ff;
+        border-radius: 8px;
         background: #fff;
         padding: 0.32rem;
         display: flex;
@@ -104,8 +144,9 @@
         gap: 0.25rem;
     }
     .day-cell.empty {
-        background: #f7f9fc;
+        background: linear-gradient(180deg, #f8f5ff 0%, #f5f7fa 100%);
         border-style: dashed;
+        border-color: #ddd6fe;
     }
     .day-number {
         font-size: 0.8rem;
@@ -129,11 +170,13 @@
     }
     .day-item.assignment {
         background: #ede9fe;
-        border: 1px solid #b9d3ff;
+        border: 1px solid #c4b5fd;
+        color: #4c1d95;
     }
     .day-item.event {
-        background: #eaf8ef;
-        border: 1px solid #bde9ca;
+        background: #ecfdf5;
+        border: 1px solid #6ee7b7;
+        color: #065f46;
     }
     .day-item a {
         color: inherit;
@@ -147,27 +190,33 @@
     }
     .card {
         display: block;
-        padding: 1.1rem;
-        border: 1px solid #dce3eb;
-        border-radius: 8px;
-        background: #fafbfd;
+        padding: 1rem 1rem 1rem 1.05rem;
+        border: 1px solid #ddd6fe;
+        border-radius: 10px;
+        background: #fff;
         text-decoration: none;
         color: inherit;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        border-left-width: 5px;
+        border-left-color: #7c3aed;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+        box-shadow: 0 1px 2px rgba(76, 29, 149, 0.04);
     }
     .card:hover {
-        border-color: #7c3aed;
-        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.18);
+        border-color: #c4b5fd;
+        border-left-color: #7c3aed;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.15);
+        transform: translateY(-1px);
     }
     .card h2 {
         margin: 0 0 0.4rem 0;
         font-size: 1.05rem;
+        color: #4c1d95;
     }
     .card p {
         margin: 0;
         font-size: 0.88rem;
         color: #5a6570;
-        line-height: 1.4;
+        line-height: 1.45;
     }
 
     .modal-overlay {
@@ -234,30 +283,34 @@
 </div>
 
 <div class="dashboard-layout">
-    <aside class="card-grid">
-        <a class="card" href="{% url 'courses:home' %}">
-            <h2>Courses</h2>
-            <p>Link your courses and their associated textbooks.</p>
-        </a>
-        <a class="card" href="{% url 'assignments:home' %}">
-            <h2>Assignments</h2>
-            <p>Track coursework and deadlines.</p>
-        </a>
-        <a class="card" href="{% url 'projects:home' %}">
-            <h2>Projects</h2>
-            <p>Organize longer-term work and milestones.</p>
-        </a>
-        <a class="card" href="{% url 'resources:home' %}">
-            <h2>Learning resources</h2>
-            <p>Save readings, videos, and reference material.</p>
-        </a>
+    <aside class="features-panel">
+        <h2 class="section-heading">Hub features</h2>
+        <div class="card-grid">
+            <a class="card" href="{% url 'courses:home' %}">
+                <h2>Courses</h2>
+                <p>Link your courses and their associated textbooks.</p>
+            </a>
+            <a class="card" href="{% url 'assignments:home' %}">
+                <h2>Assignments</h2>
+                <p>Track coursework and deadlines.</p>
+            </a>
+            <a class="card" href="{% url 'projects:home' %}">
+                <h2>Projects</h2>
+                <p>Organize longer-term work and milestones.</p>
+            </a>
+            <a class="card" href="{% url 'resources:home' %}">
+                <h2>Learning resources</h2>
+                <p>Save readings, videos, and reference material.</p>
+            </a>
+        </div>
     </aside>
 
-    <section class="calendar-panel">
+    <section class="calendar-panel" aria-labelledby="calendar-section-title">
+        <h2 class="calendar-heading" id="calendar-section-title">Calendar</h2>
         <div class="calendar-toolbar">
             <div class="toolbar-left">
                 <a class="btn-nav" href="{{ prev_month_url }}">&larr;</a>
-                <h2 class="month-title">{{ calendar_month_label }}</h2>
+                <h3 class="month-title">{{ calendar_month_label }}</h3>
                 <a class="btn-nav" href="{{ next_month_url }}">&rarr;</a>
             </div>
             <button type="button" class="btn-small" id="open-event-modal">Add event</button>
